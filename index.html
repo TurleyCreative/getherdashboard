@@ -1258,6 +1258,11 @@ textarea.fi { resize: vertical; min-height: 60px; }
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     Consent
   </button>
+  <div class="nav-divider"></div>
+  <button class="nav-tab" data-tab="templates" onclick="switchTab('templates', this)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Templates
+  </button>
 </nav>
 
 <!-- ═══════════════════════════════════════ MAIN BODY -->
@@ -1583,6 +1588,43 @@ textarea.fi { resize: vertical; min-height: 60px; }
         </button>
       </div>
 
+      <div class="tab-panel" id="tab-templates">
+        <div class="section-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Templates
+        </div>
+
+        <div id="templatesLocked">
+          <div class="info-box" style="margin-bottom:14px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            This tab is for internal team use — it holds saved form setups (e.g. for M&amp;S sites) so you don't have to rebuild the same form from scratch each time.
+          </div>
+          <div class="field">
+            <label>Team password</label>
+            <input class="fi" type="password" id="templatesPasswordInput" placeholder="Enter password" onkeydown="if(event.key==='Enter'){event.preventDefault(); checkTemplatesPassword();}">
+          </div>
+          <div class="hint" id="templatesPasswordError" style="display:none; color:var(--danger); margin-bottom:8px;">Incorrect password.</div>
+          <button class="add-stmt-btn" onclick="checkTemplatesPassword()">Unlock</button>
+        </div>
+
+        <div id="templatesUnlocked" style="display:none;">
+          <div class="info-box" style="margin-bottom:14px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Loading a template replaces every field in the builder (except the webhook URL, which is always left blank for you to fill in per client). Templates are saved in this browser only — use Export/Import to share them with teammates.
+          </div>
+          <div id="templatesContainer"></div>
+          <button class="add-stmt-btn" onclick="saveCurrentAsTemplate()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Save current setup as template
+          </button>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="add-stmt-btn" style="flex:1;" onclick="exportTemplates()">Export (.json)</button>
+            <button class="add-stmt-btn" style="flex:1;" onclick="document.getElementById('templatesImportInput').click()">Import (.json)</button>
+            <input type="file" id="templatesImportInput" accept="application/json" style="display:none" onchange="importTemplatesFile(this)">
+          </div>
+        </div>
+      </div>
+
     </div><!-- /config-panel-inner -->
   </aside>
 
@@ -1881,30 +1923,7 @@ function renderFormPreview() {
     </div>
   `;
 
-  if (statementsEnabled && statements.length > 0) {
-    html += `<div class="lp-section-head">I support this application because</div>
-    <p style="font-size:12px; color:var(--ink-soft); margin-bottom:10px">Tick as many as apply — your selected reasons will be included in your letter.</p>`;
-    statements.forEach(s => {
-      html += `<div class="lp-check-item">
-        <div class="lp-check"></div>
-        <div class="lp-check-label">${escHtml(s.label || 'Untitled statement')}</div>
-      </div>`;
-    });
-  }
-
-  const commentsLabel = statementsEnabled ? 'Additional comments' : 'Your comments';
-  const commentsOptional = statementsEnabled
-    ? `<span style="font-size:10px; font-weight:400; text-transform:none; letter-spacing:0; color:var(--ink-faint)">&nbsp;optional</span>`
-    : `<span style="font-size:10px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--accent)">&nbsp;required</span>`;
-
-  html += `
-    <div class="lp-section-head" style="margin-top:18px">${commentsLabel} ${commentsOptional}</div>
-    <p style="font-size:12px; color:var(--ink-soft); margin-bottom:8px">${escHtml(commentsPrompt)}</p>
-    <textarea class="lp-textarea" disabled placeholder="${statementsEnabled ? 'Your personal thoughts…' : 'Please share your thoughts… (required)'}"></textarea>
-  `;
-
   if (ageEnabled || genderEnabled) {
-    html += `<div class="lp-section-head" style="margin-top:18px">About you</div>`;
     if (ageEnabled) {
       const aqText = gv('ageQuestion') || 'What is your age?';
       html += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:10px 0 6px">${escHtml(aqText)}</p>`;
@@ -1936,6 +1955,28 @@ function renderFormPreview() {
       }
     }
   }
+
+  if (statementsEnabled && statements.length > 0) {
+    html += `<div class="lp-section-head" style="margin-top:18px">I support this application because</div>
+    <p style="font-size:12px; color:var(--ink-soft); margin-bottom:10px">Tick as many as apply — your selected reasons will be included in your letter.</p>`;
+    statements.forEach(s => {
+      html += `<div class="lp-check-item">
+        <div class="lp-check"></div>
+        <div class="lp-check-label">${escHtml(s.label || 'Untitled statement')}</div>
+      </div>`;
+    });
+  }
+
+  const commentsLabel = statementsEnabled ? 'Additional comments' : 'Your comments';
+  const commentsOptional = statementsEnabled
+    ? `<span style="font-size:10px; font-weight:400; text-transform:none; letter-spacing:0; color:var(--ink-faint)">&nbsp;optional</span>`
+    : `<span style="font-size:10px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--accent)">&nbsp;required</span>`;
+
+  html += `
+    <div class="lp-section-head" style="margin-top:18px">${commentsLabel} ${commentsOptional}</div>
+    <p style="font-size:12px; color:var(--ink-soft); margin-bottom:8px">${escHtml(commentsPrompt)}</p>
+    <textarea class="lp-textarea" disabled placeholder="${statementsEnabled ? 'Your personal thoughts…' : 'Please share your thoughts… (required)'}"></textarea>
+  `;
 
   if (consents.length > 0) {
     html += `<div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--rule-light)">`;
@@ -1996,7 +2037,7 @@ ${checkboxHTML}
   const genderQ = gv('genderQuestion') || 'How do you describe your gender?';
 
   const ageSectionHTML = ageEnabled ? `
-    <h4>${escHtml(ageQ)}</h4>
+    <div class="sub-heading">${escHtml(ageQ)}</div>
     ${demoLayout === 'horizontal'
       ? `<div style="display:flex; flex-wrap:wrap; gap:6px 16px; margin-bottom:10px;">\n    ${ageOptions.map(o => `<label style="margin:0;"><input type="radio" name="age_group" value="${escHtml(o)}"> ${escHtml(o)}</label>`).join('\n    ')}\n    </div>`
       : ageOptions.map(o => `<label><input type="radio" name="age_group" value="${escHtml(o)}"> ${escHtml(o)}</label><br>`).join('\n    ')
@@ -2004,7 +2045,7 @@ ${checkboxHTML}
   ` : '';
 
   const genderSectionHTML = genderEnabled ? `
-    <h4>${escHtml(genderQ)}</h4>
+    <div class="sub-heading">${escHtml(genderQ)}</div>
     ${demoLayout === 'horizontal'
       ? `<div style="display:flex; flex-wrap:wrap; gap:6px 16px; margin-bottom:10px;">\n    ${genderOptions.map(o => `<label style="margin:0;"><input type="radio" name="gender" value="${escHtml(o)}"> ${escHtml(o)}</label>`).join('\n    ')}\n    </div>`
       : genderOptions.map(o => `<label><input type="radio" name="gender" value="${escHtml(o)}"> ${escHtml(o)}</label><br>`).join('\n    ')
@@ -2012,7 +2053,6 @@ ${checkboxHTML}
   ` : '';
 
   const demoSectionHTML = (ageEnabled || genderEnabled) ? `
-    <h4>About you</h4>
     ${ageSectionHTML}
     ${genderSectionHTML}
   ` : '';
@@ -2042,6 +2082,7 @@ ${checkboxHTML}
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
     h4 { margin-top: 20px; margin-bottom: 8px; }
+    .sub-heading { font-weight: 500; margin: 20px 0 8px; }
     label {
       display: inline-flex;
       align-items: center;
@@ -2108,7 +2149,7 @@ ${checkboxHTML}
 
 <div id="letter-form-container" class="section-box">
   <h4>${escHtml(appRef)}</h4>
-  <h4>About you (required)</h4>
+  <div class="sub-heading">About you (required)</div>
 
   <form id="support-form" onsubmit="${previewEnabled ? 'generatePreview' : 'directSubmit'}(event)">
     <label for="name">Your Name <span class="req-marker">(required)</span></label>
@@ -2130,13 +2171,13 @@ ${checkboxHTML}
     <label for="postcode">Postcode <span class="req-marker">(required)</span></label>
     <input type="text" id="postcode" name="postcode" required>
 
+${demoSectionHTML}
 ${stmtSectionHTML}
     <h4>${commentsTitle}</h4>
     <p>${escHtml(commentsPrompt)}</p>
     <textarea id="additionalcomments" name="additionalcomments"${commentsRequired}></textarea>
     <br><br>
 
-${demoSectionHTML}
 ${consentHTML}
 
     <button type="submit">${escHtml(generateBtnText)}</button>
@@ -2404,16 +2445,20 @@ function removeDemoOption(type, i) {
   regen();
 }
 
-function toggleDemo(type) {
+function syncDemoEnabledUI(type) {
   if (type === 'age') {
-    ageEnabled = !ageEnabled;
     document.getElementById('ageToggleTrack').classList.toggle('on', ageEnabled);
     document.getElementById('ageFieldBlock').classList.toggle('demo-field-disabled', !ageEnabled);
   } else {
-    genderEnabled = !genderEnabled;
     document.getElementById('genderToggleTrack').classList.toggle('on', genderEnabled);
     document.getElementById('genderFieldBlock').classList.toggle('demo-field-disabled', !genderEnabled);
   }
+}
+
+function toggleDemo(type) {
+  if (type === 'age') ageEnabled = !ageEnabled;
+  else genderEnabled = !genderEnabled;
+  syncDemoEnabledUI(type);
   regen();
 }
 
@@ -2426,20 +2471,19 @@ const fieldToggles = {
   closingEnabled: true
 };
 
-function togglePreviewEnabled() {
-  previewEnabled = !previewEnabled;
+function syncPreviewEnabledUI() {
   document.getElementById('previewToggleTrack').classList.toggle('on', previewEnabled);
   document.getElementById('previewToggleRow').classList.toggle('toggle-off', !previewEnabled);
+}
+
+function togglePreviewEnabled() {
+  previewEnabled = !previewEnabled;
+  syncPreviewEnabledUI();
 
   // When turning preview off, auto-disable opening para, stmt intro and closing line
   if (!previewEnabled) {
     ['opening', 'stmtIntro', 'closing'].forEach(name => {
-      const map = {
-        opening:   { flag: 'openingEnabled',   trackId: 'openingToggleTrack',   wrapId: 'openingFieldWrap' },
-        stmtIntro: { flag: 'stmtIntroEnabled', trackId: 'stmtIntroToggleTrack', wrapId: 'stmtIntroFieldWrap' },
-        closing:   { flag: 'closingEnabled',   trackId: 'closingToggleTrack',   wrapId: 'closingFieldWrap' }
-      };
-      const m = map[name];
+      const m = fieldToggleMap[name];
       if (fieldToggles[m.flag]) {
         fieldToggles[m.flag] = false;
         document.getElementById(m.trackId).classList.remove('on');
@@ -2451,24 +2495,30 @@ function togglePreviewEnabled() {
   regen();
 }
 
-function toggleField(name) {
-  const map = {
-    opening:   { flag: 'openingEnabled',   trackId: 'openingToggleTrack',   wrapId: 'openingFieldWrap' },
-    stmtIntro: { flag: 'stmtIntroEnabled', trackId: 'stmtIntroToggleTrack', wrapId: 'stmtIntroFieldWrap' },
-    closing:   { flag: 'closingEnabled',   trackId: 'closingToggleTrack',   wrapId: 'closingFieldWrap' }
-  };
-  const m = map[name];
+const fieldToggleMap = {
+  opening:   { flag: 'openingEnabled',   trackId: 'openingToggleTrack',   wrapId: 'openingFieldWrap' },
+  stmtIntro: { flag: 'stmtIntroEnabled', trackId: 'stmtIntroToggleTrack', wrapId: 'stmtIntroFieldWrap' },
+  closing:   { flag: 'closingEnabled',   trackId: 'closingToggleTrack',   wrapId: 'closingFieldWrap' }
+};
+
+function syncFieldToggleUI(name) {
+  const m = fieldToggleMap[name];
   if (!m) return;
-  fieldToggles[m.flag] = !fieldToggles[m.flag];
   const on = fieldToggles[m.flag];
   document.getElementById(m.trackId).classList.toggle('on', on);
   const wrap = document.getElementById(m.wrapId);
   wrap.parentElement.classList.toggle('field-disabled', !on);
+}
+
+function toggleField(name) {
+  const m = fieldToggleMap[name];
+  if (!m) return;
+  fieldToggles[m.flag] = !fieldToggles[m.flag];
+  syncFieldToggleUI(name);
   regen();
 }
 
-function toggleStatementsEnabled() {
-  statementsEnabled = !statementsEnabled;
+function syncStatementsEnabledUI() {
   const track = document.getElementById('stmtsToggleTrack');
   const navTab = document.getElementById('stmtsNavTab');
   const panel = document.getElementById('tab-statements');
@@ -2486,8 +2536,209 @@ function toggleStatementsEnabled() {
   stmtsContainer.style.pointerEvents = statementsEnabled ? '' : 'none';
   addBtn.style.opacity = statementsEnabled ? '1' : '0.35';
   addBtn.style.pointerEvents = statementsEnabled ? '' : 'none';
+}
+
+function toggleStatementsEnabled() {
+  statementsEnabled = !statementsEnabled;
+  syncStatementsEnabledUI();
+  regen();
+}
+
+/* ══════════════════════════════════════════════════════════
+   TEMPLATES (pre-saved form setups)
+══════════════════════════════════════════════════════════ */
+const TEMPLATES_PASSWORD = 'gether2026';
+const TEMPLATES_STORAGE_KEY = 'getherTemplates';
+let templates = [];
+
+function loadTemplatesFromStorage() {
+  try {
+    templates = JSON.parse(localStorage.getItem(TEMPLATES_STORAGE_KEY) || '[]');
+  } catch (e) {
+    templates = [];
+  }
+}
+
+function saveTemplatesToStorage() {
+  localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+}
+
+function checkTemplatesPassword() {
+  const input = document.getElementById('templatesPasswordInput');
+  const err = document.getElementById('templatesPasswordError');
+  if (input.value === TEMPLATES_PASSWORD) {
+    document.getElementById('templatesLocked').style.display = 'none';
+    document.getElementById('templatesUnlocked').style.display = 'block';
+    err.style.display = 'none';
+    input.value = '';
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+function renderTemplates() {
+  const c = document.getElementById('templatesContainer');
+  if (!c) return;
+  c.innerHTML = '';
+  if (templates.length === 0) {
+    c.innerHTML = '<div class="hint" style="margin-bottom:12px;">No saved templates yet. Set up a form the way you like it on the other tabs, then click "Save current setup as template" below.</div>';
+    return;
+  }
+  templates.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'stmt-card';
+    row.innerHTML = `
+      <div class="stmt-card-header" style="cursor:default;">
+        <div class="stmt-number">${i+1}</div>
+        <div class="stmt-label-input" style="pointer-events:none;">${escHtml(t.name)}</div>
+        <button class="icon-btn add" title="Load this template" onclick="loadTemplate(${i})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        </button>
+        <button class="icon-btn" style="color:var(--danger)" title="Delete this template" onclick="deleteTemplate(${i})">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
+        </button>
+      </div>
+    `;
+    c.appendChild(row);
+  });
+}
+
+function collectCurrentConfig() {
+  return {
+    appRef: gv('appRef'),
+    siteDesc: gv('siteDesc'),
+    primaryColor: gv('primaryColor') || '#4da16e',
+    fontName: gv('fontName'),
+    btnRadius: gv('btnRadius') || '8px',
+    demoLayout: demoLayout,
+    statementsEnabled: statementsEnabled,
+    statements: JSON.parse(JSON.stringify(statements)),
+    previewEnabled: previewEnabled,
+    fieldToggles: JSON.parse(JSON.stringify(fieldToggles)),
+    openingPara: gv('openingPara'),
+    stmtIntro: gv('stmtIntro'),
+    closingLine: gv('closingLine'),
+    commentsPrompt: gv('commentsPrompt'),
+    generateBtnText: gv('generateBtnText'),
+    submitBtnText: gv('submitBtnText'),
+    ageEnabled: ageEnabled,
+    ageQuestion: gv('ageQuestion'),
+    ageOptions: ageOptions.slice(),
+    genderEnabled: genderEnabled,
+    genderQuestion: gv('genderQuestion'),
+    genderOptions: genderOptions.slice(),
+    consents: consents.slice()
+  };
+}
+
+function applyConfig(cfg) {
+  document.getElementById('appRef').value = cfg.appRef || '';
+  document.getElementById('siteDesc').value = cfg.siteDesc || '';
+  document.getElementById('zapierUrl').value = ''; // always left blank — fill in per client
+  document.getElementById('primaryColor').value = cfg.primaryColor || '#4da16e';
+  document.getElementById('primaryColorPicker').value = cfg.primaryColor || '#4da16e';
+  document.getElementById('fontName').value = cfg.fontName || '';
+  document.getElementById('btnRadius').value = cfg.btnRadius || '8px';
+
+  demoLayout = cfg.demoLayout || 'vertical';
+  document.getElementById('layoutOptVertical').classList.toggle('active', demoLayout === 'vertical');
+  document.getElementById('layoutOptHorizontal').classList.toggle('active', demoLayout === 'horizontal');
+
+  statements = (cfg.statements && cfg.statements.length)
+    ? JSON.parse(JSON.stringify(cfg.statements))
+    : [{ key: 'reason1', label: '', open: true, variants: ['', ''] }];
+  renderStatements();
+
+  statementsEnabled = cfg.statementsEnabled !== false;
+  syncStatementsEnabledUI();
+
+  previewEnabled = cfg.previewEnabled !== false;
+  syncPreviewEnabledUI();
+
+  fieldToggles.openingEnabled = !!cfg.fieldToggles?.openingEnabled;
+  fieldToggles.stmtIntroEnabled = !!cfg.fieldToggles?.stmtIntroEnabled;
+  fieldToggles.closingEnabled = !!cfg.fieldToggles?.closingEnabled;
+  syncFieldToggleUI('opening');
+  syncFieldToggleUI('stmtIntro');
+  syncFieldToggleUI('closing');
+
+  document.getElementById('openingPara').value = cfg.openingPara || '';
+  document.getElementById('stmtIntro').value = cfg.stmtIntro || '';
+  document.getElementById('closingLine').value = cfg.closingLine || '';
+  document.getElementById('commentsPrompt').value = cfg.commentsPrompt || '';
+  document.getElementById('generateBtnText').value = cfg.generateBtnText || '';
+  document.getElementById('submitBtnText').value = cfg.submitBtnText || '';
+
+  ageEnabled = !!cfg.ageEnabled;
+  document.getElementById('ageQuestion').value = cfg.ageQuestion || 'What is your age?';
+  ageOptions = (cfg.ageOptions && cfg.ageOptions.length) ? cfg.ageOptions.slice() : ageOptions;
+  renderDemoOptions('age');
+  syncDemoEnabledUI('age');
+
+  genderEnabled = !!cfg.genderEnabled;
+  document.getElementById('genderQuestion').value = cfg.genderQuestion || 'How do you describe your gender?';
+  genderOptions = (cfg.genderOptions && cfg.genderOptions.length) ? cfg.genderOptions.slice() : genderOptions;
+  renderDemoOptions('gender');
+  syncDemoEnabledUI('gender');
+
+  consents = (cfg.consents && cfg.consents.length) ? cfg.consents.slice() : consents;
+  renderConsents();
 
   regen();
+}
+
+function saveCurrentAsTemplate() {
+  const name = prompt('Name this template (e.g. "M&S — standard support form"):');
+  if (!name || !name.trim()) return;
+  templates.push({ name: name.trim(), config: collectCurrentConfig() });
+  saveTemplatesToStorage();
+  renderTemplates();
+}
+
+function loadTemplate(i) {
+  const t = templates[i];
+  if (!t) return;
+  if (!confirm(`Load "${t.name}"? This replaces every field currently in the builder (the webhook URL is left blank).`)) return;
+  applyConfig(t.config);
+  switchTab('details', document.querySelector('.nav-tab[data-tab="details"]'));
+}
+
+function deleteTemplate(i) {
+  const t = templates[i];
+  if (!t) return;
+  if (!confirm(`Delete template "${t.name}"? This cannot be undone.`)) return;
+  templates.splice(i, 1);
+  saveTemplatesToStorage();
+  renderTemplates();
+}
+
+function exportTemplates() {
+  const blob = new Blob([JSON.stringify(templates, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gether-templates.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importTemplatesFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const imported = JSON.parse(reader.result);
+      if (!Array.isArray(imported)) throw new Error('Invalid file');
+      templates = templates.concat(imported);
+      saveTemplatesToStorage();
+      renderTemplates();
+      alert(`Imported ${imported.length} template(s).`);
+    } catch (e) {
+      alert('Could not read that file — make sure it\'s a templates JSON file exported from this tool.');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
 }
 
 document.getElementById('colorSwatch1').style.backgroundColor = '#4da16e';
@@ -2498,6 +2749,8 @@ renderStatements();
 renderConsents();
 renderDemoOptions('age');
 renderDemoOptions('gender');
+loadTemplatesFromStorage();
+renderTemplates();
 regen();
 </script>
 </body>
