@@ -1,0 +1,2819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gether — Support Form Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --forest: #2d6b47;
+  --forest-mid: #3a8559;
+  --forest-light: #4da16e;
+  --sage: #5B8A72;
+  --sage-pale: #A8C4B5;
+  --mint: #D4EDE3;
+  --mint-light: #EBF5EF;
+  --cream: #FAF8F3;
+  --warm-white: #FFFFFF;
+  --sand: #F0EDE5;
+  --parchment: #E8E3D8;
+  --ink: #1C1C1A;
+  --ink-mid: #3D3D39;
+  --ink-soft: #6B6B65;
+  --ink-faint: #9E9E97;
+  --rule: #DDD9D0;
+  --rule-light: #EDEAE3;
+  --accent: #C45A2A;
+  --accent-light: #F5E8E0;
+  --danger: #B83333;
+  --success: #4da16e;
+  --panel-w: 340px;
+  --header-h: 64px;
+  --nav-h: 52px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+.app-header {
+  height: var(--header-h);
+  background: var(--sand);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--rule);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-tagline {
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hdr-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s;
+  letter-spacing: 0.01em;
+}
+
+.hdr-btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+}
+.hdr-btn-ghost:hover { background: var(--parchment); color: var(--ink); border-color: var(--border-strong); }
+
+.hdr-btn-primary {
+  background: var(--forest-light);
+  color: #fff;
+}
+.hdr-btn-primary:hover { background: var(--sage); }
+
+.hdr-btn-accent {
+  background: var(--forest-light);
+  color: #fff;
+}
+.hdr-btn-accent:hover { opacity: 0.88; }
+
+.hdr-btn svg { flex-shrink: 0; }
+
+/* ── NAV TABS ── */
+.app-nav {
+  height: var(--nav-h);
+  background: var(--forest-mid);
+  display: flex;
+  align-items: stretch;
+  padding: 0 28px;
+  position: fixed;
+  top: var(--header-h);
+  left: 0; right: 0;
+  z-index: 99;
+  gap: 2px;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  position: relative;
+  white-space: nowrap;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: 'Poppins', sans-serif;
+}
+
+.nav-tab:hover { color: rgba(255,255,255,0.85); }
+
+.nav-tab.active {
+  color: #fff;
+  border-bottom-color: var(--mint);
+}
+
+.nav-tab .tab-num {
+  width: 18px; height: 18px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.nav-tab.active .tab-num {
+  background: var(--forest-light);
+}
+
+.nav-divider {
+  width: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 10px 4px;
+}
+
+/* ── MAIN LAYOUT ── */
+.app-body {
+  display: flex;
+  height: calc(100vh - var(--header-h) - var(--nav-h));
+  margin-top: calc(var(--header-h) + var(--nav-h));
+  overflow: hidden;
+}
+
+/* ── LEFT CONFIG PANEL ── */
+.config-panel {
+  width: var(--panel-w);
+  flex-shrink: 0;
+  background: var(--warm-white);
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.config-panel-inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  padding-bottom: 60px;
+  min-height: 0;
+}
+
+.config-panel-inner::-webkit-scrollbar { width: 5px; }
+.config-panel-inner::-webkit-scrollbar-track { background: transparent; }
+.config-panel-inner::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+.config-panel-inner::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* ── TAB CONTENT PANELS ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── FIELD GROUPS ── */
+.field-group {
+  margin-bottom: 20px;
+}
+
+.field-group-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-light);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-group-title svg {
+  color: var(--sage);
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-mid);
+  margin-bottom: 4px;
+}
+
+.field .hint {
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.fi {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--cream);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+.fi:focus {
+  border-color: var(--forest-light);
+  box-shadow: 0 0 0 3px rgba(45,122,88,0.12);
+  background: #fff;
+}
+
+.fi::placeholder { color: var(--ink-faint); }
+textarea.fi { resize: vertical; min-height: 60px; }
+
+.fi-row { display: flex; gap: 8px; }
+.fi-row .fi { flex: 1; }
+
+/* colour swatch input */
+.color-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-swatch {
+  width: 36px; height: 36px;
+  border-radius: 6px;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.color-swatch input[type="color"] {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+}
+
+/* ── STATEMENT CARDS ── */
+.stmt-card {
+  background: var(--cream);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+
+.stmt-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+.stmt-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--mint-light);
+  border-bottom: 1px solid var(--rule-light);
+  cursor: pointer;
+}
+
+.stmt-drag-handle {
+  color: var(--ink-faint);
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.stmt-number {
+  width: 20px; height: 20px;
+  background: var(--forest);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.stmt-label-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  outline: none;
+  min-width: 0;
+}
+
+.stmt-label-input::placeholder { color: var(--ink-faint); font-weight: 400; }
+
+.stmt-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-faint);
+  padding: 2px;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.stmt-toggle-btn.open { transform: rotate(180deg); }
+
+.stmt-body {
+  padding: 12px;
+  display: none;
+}
+
+.stmt-body.open { display: block; }
+
+.variant-row {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.variant-badge {
+  width: 20px; height: 20px;
+  background: var(--parchment);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+  margin-top: 9px;
+  letter-spacing: -0.02em;
+}
+
+.variant-row textarea {
+  flex: 1;
+  min-height: 50px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  color: var(--ink-faint);
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-btn:hover { background: var(--sand); color: var(--danger); }
+.icon-btn.add:hover { color: var(--forest-light); }
+
+.add-variant-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--forest-light);
+  background: transparent;
+  border: 1px dashed var(--sage-pale);
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  transition: all 0.15s;
+  margin-top: 4px;
+}
+
+.add-variant-btn:hover { background: var(--mint-light); border-color: var(--sage); }
+
+.add-stmt-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  background: transparent;
+  border: 1.5px dashed var(--rule);
+  border-radius: 8px;
+  color: var(--ink-soft);
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 10px;
+}
+
+.add-stmt-btn:hover {
+  border-color: var(--forest-light);
+  color: var(--forest-light);
+  background: var(--mint-light);
+}
+
+/* ── CONSENT ROWS ── */
+.consent-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.consent-row .fi { flex: 1; font-size: 12px; }
+
+/* ── RIGHT PREVIEW PANEL ── */
+.preview-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--sand);
+}
+
+.preview-toolbar {
+  height: 46px;
+  background: var(--warm-white);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.preview-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-right: 6px;
+}
+
+.view-toggle {
+  display: flex;
+  background: var(--sand);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.view-btn {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 5px;
+}
+
+.view-btn.active {
+  background: var(--forest);
+  color: #fff;
+}
+
+.view-btn:not(.active):hover { background: var(--parchment); }
+
+.preview-spacer { flex: 1; }
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--success);
+  font-weight: 600;
+}
+
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── PREVIEW VIEWS ── */
+.preview-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+
+.preview-view {
+  position: absolute;
+  inset: 0;
+  display: none;
+  overflow: hidden;
+}
+
+.preview-view.active { display: flex; flex-direction: column; }
+
+/* FORM PREVIEW */
+.form-preview-wrap {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 30px 20px;
+  min-height: 0;
+}
+
+.form-preview-wrap::-webkit-scrollbar { width: 6px; }
+.form-preview-wrap::-webkit-scrollbar-track { background: transparent; }
+.form-preview-wrap::-webkit-scrollbar-thumb { background: var(--parchment); border-radius: 3px; }
+
+.form-chrome {
+  width: 100%;
+  max-width: 640px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.05);
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.form-chrome-bar {
+  height: 36px;
+  background: #F2F0EA;
+  border-bottom: 1px solid #E0DDD5;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 6px;
+}
+
+.chrome-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+.chrome-dot:nth-child(1) { background: #FF5F57; }
+.chrome-dot:nth-child(2) { background: #FFBD2E; }
+.chrome-dot:nth-child(3) { background: #28C840; }
+
+.chrome-url {
+  flex: 1;
+  height: 22px;
+  background: #fff;
+  border-radius: 4px;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 10px;
+  color: #888;
+  gap: 4px;
+}
+
+.form-preview-body {
+  padding: 24px;
+}
+
+/* Live preview form styles */
+.lp-app-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--forest-light);
+  background: var(--mint-light);
+  border: 1px solid var(--mint);
+  border-radius: 4px;
+  padding: 3px 8px;
+  margin-bottom: 14px;
+}
+
+.lp-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  color: var(--ink);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.lp-subtitle {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 20px;
+}
+
+.lp-section-head {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--forest);
+  margin: 20px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lp-section-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule-light);
+}
+
+.lp-field-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.lp-field-row > div { flex: 1; }
+
+.lp-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-mid);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lp-req { color: var(--accent); font-size: 10px; margin-left: 4px; }
+
+.lp-input {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--cream);
+}
+
+.lp-textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--cream);
+  height: 90px;
+  resize: none;
+}
+
+.lp-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid var(--rule-light);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.lp-check-item:hover {
+  background: var(--mint-light);
+  border-color: var(--sage-pale);
+}
+
+.lp-check {
+  width: 16px; height: 16px;
+  border: 2px solid var(--rule);
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.lp-radio {
+  width: 16px; height: 16px;
+  border: 2px solid var(--rule);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.lp-check-label {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.4;
+}
+
+.lp-consent-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.lp-submit-btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 20px;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s;
+}
+
+.lp-submit-btn:hover { opacity: 0.88; }
+
+/* ── CODE VIEW ── */
+.code-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.code-toolbar {
+  padding: 10px 16px;
+  background: #1E2A24;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.code-filename {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.code-filename span {
+  color: var(--mint);
+  font-weight: 500;
+}
+
+.code-spacer { flex: 1; }
+
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--forest-light);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+
+.copy-btn:hover { background: var(--sage); }
+.copy-btn.copied { background: var(--success); }
+
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 5px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.download-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+.code-textarea {
+  flex: 1;
+  background: #1A2420;
+  color: #9DCDB8;
+  font-family: 'DM Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  padding: 20px 22px;
+  border: none;
+  resize: none;
+  outline: none;
+  overflow-y: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.code-textarea::-webkit-scrollbar { width: 6px; height: 6px; }
+.code-textarea::-webkit-scrollbar-track { background: transparent; }
+.code-textarea::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+/* ── UTILITY ── */
+.divider {
+  height: 1px;
+  background: var(--rule-light);
+  margin: 16px 0;
+}
+
+.info-box {
+  background: var(--mint-light);
+  border: 1px solid var(--mint);
+  border-radius: 6px;
+  padding: 9px 11px;
+  font-size: 11.5px;
+  color: var(--forest);
+  line-height: 1.5;
+  display: flex;
+  gap: 7px;
+  margin-top: 6px;
+}
+
+.info-box svg { flex-shrink: 0; margin-top: 1px; }
+
+.section-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--forest);
+  color: var(--mint);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stmt-card { animation: fadeSlideIn 0.2s ease; }
+
+/* ── LETTER COPY FIELD BLOCKS ── */
+.lc-field-block {
+  border-bottom: 1px solid var(--rule-light);
+  padding: 14px 0;
+  margin-bottom: 2px;
+}
+
+.lc-field-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.lc-field-meta { flex: 1; }
+
+.lc-field-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.lc-field-desc {
+  font-size: 11px;
+  color: var(--ink-faint);
+  line-height: 1.45;
+}
+
+.lc-divider {
+  height: 1px;
+  background: var(--rule-light);
+  margin: 14px 0;
+}
+
+/* field disabled state */
+.field-disabled .fi {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.field-disabled .lc-field-name {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.field-disabled .lc-field-desc { opacity: 0.4; }
+
+/* ── TOGGLE ROW (preview toggle) ── */
+.toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--mint-light);
+  border: 1px solid var(--mint);
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.toggle-row-left { flex: 1; }
+
+.toggle-row-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--forest);
+  margin-bottom: 3px;
+}
+
+.toggle-row-desc {
+  font-size: 11px;
+  color: var(--forest-mid);
+  opacity: 0.8;
+  line-height: 1.45;
+}
+
+.toggle-row.toggle-off {
+  background: var(--sand);
+  border-color: var(--rule);
+}
+
+.toggle-row.toggle-off .toggle-row-label { color: var(--ink-soft); }
+.toggle-row.toggle-off .toggle-row-desc { color: var(--ink-faint); opacity: 1; }
+
+/* ── PILL TOGGLE (reusable) ── */
+.pill-toggle {
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.pill-track {
+  width: 32px;
+  height: 18px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 9px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.pill-track.on { background: var(--forest-light); }
+
+.pill-thumb {
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.pill-track.on .pill-thumb { transform: translateX(14px); }
+
+/* ── PERSONAL DETAILS TAB ── */
+.demo-fixed-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: var(--rule-light);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: var(--ink-mid);
+}
+
+.demo-lock { font-size: 11px; opacity: 0.5; flex-shrink: 0; }
+
+.demo-req-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
+}
+
+.demo-opt-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  background: var(--sand);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.demo-option-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+
+.demo-option-row .fi {
+  flex: 1;
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+.demo-field-disabled {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+/* ── DEMOGRAPHIC LAYOUT TOGGLE ── */
+.layout-toggle-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.layout-opt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 8px;
+  background: var(--cream);
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  transition: all 0.15s;
+}
+
+.layout-opt:hover {
+  border-color: var(--forest-light);
+  color: var(--forest-light);
+  background: var(--mint-light);
+}
+
+.layout-opt.active {
+  border-color: var(--forest-light);
+  background: var(--mint-light);
+  color: var(--forest);
+}
+
+.layout-opt svg { color: currentColor; }
+
+/* ── SCROLLBAR ── */
+* { scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+
+/* ── STATEMENTS TOGGLE SWITCH in nav ── */
+.stmt-toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+.stmt-toggle-track {
+  display: inline-flex;
+  align-items: center;
+  width: 28px;
+  height: 16px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 2px;
+  transition: background 0.2s;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.stmt-toggle-track.on {
+  background: var(--mint);
+}
+
+.stmt-toggle-thumb {
+  width: 10px;
+  height: 10px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+
+.stmt-toggle-track.on .stmt-toggle-thumb {
+  transform: translateX(12px);
+  background: var(--forest);
+}
+
+.nav-tab.stmts-disabled {
+  opacity: 0.4;
+  pointer-events: none; /* tab body not clickable, toggle still works via its own handler */
+}
+
+/* re-enable pointer events on the toggle even when tab is dimmed */
+.nav-tab.stmts-disabled .stmt-toggle-switch {
+  pointer-events: all;
+}
+
+/* disabled state for statements tab body */
+.tab-panel.stmts-panel-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ HEADER -->
+<header class="app-header">
+  <div class="logo">
+    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NjIuNzEgMjIzLjgzIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjMjUyNTI1OwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6IG5vbmU7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogIzRkYTE2ZTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGc+CiAgICA8cmVjdCBjbGFzcz0iY2xzLTIiIHg9Ii00LjE3IiB5PSIwIiB3aWR0aD0iNzY2Ljg5IiBoZWlnaHQ9IjE5NS44Ii8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik01Mi42Niw1NS40NGMxMS44OCwwLDIxLjQzLDIuNTYsMjcuMDIsNi41Miw1LjM2LTEzLjA0LDE1LjM3LTE4LjYzLDI0LjIyLTE4LjYzLDMuMDMsMCw1LjgyLjcsOC4zOCwxLjg2djIxLjY2bC0yMS40MywyLjFjNy4yMiw1LjU5LDEzLjI4LDEzLjk3LDEzLjI4LDI4LjY1LDAsMjcuNDgtMjAuNSw0MS42OS00OS42MSw0MS42OS02Ljk5LDAtMTMuNTEtMS4xNy0xNy43LTIuMzMtMy43MywzLjczLTUuODIsNi4wNi01LjgyLDkuMzIsMCwzLjk2LDMuMDMsNC44OSwxMC4yNSw0Ljg5aDMwLjI4YzI1Ljg1LDAsNDUuNjUsNi41Miw0NS42NSwzMy4wNywwLDI0LjIyLTE3LjQ3LDM5LjU5LTY0Ljk4LDM5LjU5QzEyLjYsMjIzLjgzLjI1LDIxNS42OC4yNSwxOTkuODRjMC04Ljg1LDUuMTItMTQuNjcsMTIuMTEtMTkuOC03LjQ1LTMuNzMtMTAuNzEtOS4zMi0xMC43MS0xNi4zLDAtMTEuMTgsNS4zNi0xNywyMi44Mi0zMC43NC0xMi44MS01LjEyLTIxLjQzLTE3LjI0LTIxLjQzLTM0LjQ3LDAtMjYuMzIsMTkuNTYtNDMuMDksNDkuNjEtNDMuMDlaTTI1LjQxLDE4NC4yNGMtMi4xLDMuMjYtMy43Myw2Ljc1LTMuNzMsMTAuOTUsMCw5LjU1LDguMzgsMTIuNTgsMzMuNTQsMTIuNTgsMjMuMjksMCwzNS42NC0yLjc5LDM1LjY0LTEzLjUxLDAtOC42Mi02Ljk5LTEwLjAxLTIwLjUtMTAuMDFIMjUuNDFaTTU0LjA1LDEyMy42OGMxMC45NSwwLDE0LjkxLTcuOTIsMTQuOTEtMjguMTgsMC0xOC44Ny0zLjQ5LTI2Ljc4LTE0LjY3LTI2Ljc4LTEwLjI1LDAtMTUuODQsOC42Mi0xNS44NCwyNy4yNSwwLDE5LjU2LDMuNzMsMjcuNzIsMTUuNjEsMjcuNzJaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xNzkuMzYsNTUuNDRjMjkuODEsMCw1MC4zMSwxNi4wNyw1MC4zMSw1MS40NywwLDMuMDMtLjIzLDkuMzItLjQ3LDEyLjU4aC02OS44N2MuMjMsMjEuNjYsNS4xMiwzOC40MywyNi4wOSwzOC40MywxNC40NCwwLDIxLjItOC4zOCwyNi43OS0yMC45NmwxNi41NCw1LjgyYy02Ljk5LDIxLjg5LTI0LjIyLDM0LjQ3LTQ5LjE0LDM0LjQ3LTM3LjczLDAtNTcuOTktMjMuNzYtNTcuOTktNTguOTMsMC00MC4wNiwyNC42OS02Mi44OSw1Ny43Ni02Mi44OVpNMTkzLjEsMTA0LjExdi00LjE5YzAtMjEuMTktMy4wMy0zMC41MS0xNS4xNC0zMC41MS0xMy43NCwwLTE3LjkzLDE1LjM3LTE4LjQsMzQuN2gzMy41NFoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTI1Ni4yMiw3NS43aC0xNy40N3YtMTcuN2gxNy40N3YtMjkuMTFsMjIuODMtNC42NmgxMy4yOHYzMy43N2gzMS4yMXYxNy43aC0zMS4yMXY2Ni44NWMwLDEwLjQ4LDMuMDMsMTUuNjEsMTEuMTgsMTUuNjEsOC42MiwwLDEyLjgxLTcuNjksMTcuNDctMjQuNjlsMTMuNTEsMy40OWMtNC40MywyNS42Mi0xNi4zLDQwLjI5LTQxLjY5LDQwLjI5LTIzLjI5LDAtMzYuNTctOS43OC0zNi41Ny0zNS40di02Ni4xNVoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTM4OS45MiwwdjYxLjcybC0uOTMsMTQuNjdoMS40YzYuNTItMTEuNjUsMTYuMDctMjAuOTYsMzYuMzMtMjAuOTYsMjIuODMsMCwzNi4xLDEwLjcxLDM2LjEsMzcuOTZ2NjMuMzVsMTQuNjcsMS42M3YxNi4zaC02MS43MnYtMTYuM2wxMC45NS0xLjYzdi01OC42OWMwLTEyLjU4LTEuNjMtMjAuOTYtMTQuNjctMjAuOTYtMTIuMzQsMC0yMi4xMyw3LjQ1LTIyLjEzLDI3LjAydjUyLjY0bDExLjg4LDEuNjN2MTYuM2gtNjMuMTJ2LTE2LjNsMTUuMTQtMS42M1YxOS4zNGwtMTUuMTQtMS42M1YxLjYzTDM4OS45MiwwWiIvPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNTQ2LjIsNTUuNDRjMjkuODEsMCw1MC4zMSwxNi4wNyw1MC4zMSw1MS40NywwLDMuMDMtLjIzLDkuMzItLjQ3LDEyLjU4aC02OS44N2MuMjMsMjEuNjYsNS4xMiwzOC40MywyNi4wOSwzOC40MywxNC40NCwwLDIxLjItOC4zOCwyNi43OS0yMC45NmwxNi41NCw1LjgyYy02Ljk5LDIxLjg5LTI0LjIyLDM0LjQ3LTQ5LjE0LDM0LjQ3LTM3LjczLDAtNTcuOTktMjMuNzYtNTcuOTktNTguOTMsMC00MC4wNiwyNC42OS02Mi44OSw1Ny43Ni02Mi44OVpNNTU5Ljk0LDEwNC4xMXYtNC4xOWMwLTIxLjE5LTMuMDMtMzAuNTEtMTUuMTQtMzAuNTEtMTMuNzQsMC0xNy45MywxNS4zNy0xOC40LDM0LjdoMzMuNTRaIi8+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik02ODguMjcsMTU4LjM4djE2LjNoLTc3Ljc5di0xNi4zbDE1LjE0LTEuNjN2LTgwLjM1bC0xNS4xNC0xLjYzdi0xNS44NGw0Ny41MS0xLjYzLDEuNjMsMjAuMDNoLjkzYzUuNTktMTAuOTUsMTQuNjctMjEuODksMzMuNTQtMjEuODksMTUuNjEsMCwyNy43Miw4LjM4LDI3LjcyLDI3Ljk1LDAsMTUuMzctOS4zMiwyNC40Ni0yMi41OSwyNC40Ni0xNC42NywwLTE5LjgtOS4wOC0xOS41Ni0yMS4ybDkuMzItMi43OWMuMjMtMS4xNi40Ny0yLjEuNDctMy4wMywwLTMuOTYtMi43OS01LjU5LTYuNzUtNS41OS0xMy4wNCwwLTIwLjk2LDE1Ljg0LTIwLjk2LDMzLjA3djQ4LjQ1bDI2LjU1LDEuNjNaIi8+CiAgPC9nPgogIDxyZWN0IGNsYXNzPSJjbHMtMyIgeD0iNzIxLjgyIiB5PSIxMzMuNzkiIHdpZHRoPSI0MC45IiBoZWlnaHQ9IjQwLjkiLz4KPC9zdmc+" alt="Gether" style="height:34px; width:auto; display:block;">
+    <div class="logo-tagline" style="margin-top:4px;">Support Form Builder</div>
+  </div>
+  <div class="header-actions">
+    <button class="hdr-btn hdr-btn-ghost" onclick="previewInNewTab()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Open Preview
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════ NAV TABS -->
+<nav class="app-nav">
+  <button class="nav-tab active" data-tab="details" onclick="switchTab('details', this)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Application
+  </button>
+  <div class="nav-divider"></div>
+  <div class="nav-divider"></div>
+  <button class="nav-tab" data-tab="statements" onclick="switchTab('statements', this)" id="stmtsNavTab">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    Statements
+    <span class="stmt-toggle-switch" id="stmtsNavToggle" onclick="event.stopPropagation(); toggleStatementsEnabled()" title="Enable or disable statements">
+      <span class="stmt-toggle-track" id="stmtsToggleTrack">
+        <span class="stmt-toggle-thumb"></span>
+      </span>
+    </span>
+  </button>
+  <div class="nav-divider"></div>
+  <button class="nav-tab" data-tab="personal" onclick="switchTab('personal', this)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Personal Details
+  </button>
+  <div class="nav-divider"></div>
+  <button class="nav-tab" data-tab="letter" onclick="switchTab('letter', this)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Letter Copy
+  </button>
+  <div class="nav-divider"></div>
+  <button class="nav-tab" data-tab="design" onclick="switchTab('design', this)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+    Design
+  </button>
+  <div class="nav-divider"></div>
+  <button class="nav-tab" data-tab="consent" onclick="switchTab('consent', this)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Consent
+  </button>
+  <div class="nav-divider"></div>
+  <button class="nav-tab" data-tab="templates" onclick="switchTab('templates', this)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Templates
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════ MAIN BODY -->
+<div class="app-body">
+
+  <!-- LEFT: CONFIG PANEL -->
+  <aside class="config-panel">
+    <div class="config-panel-inner">
+
+      <!-- ── TAB: APPLICATION DETAILS ── -->
+      <div class="tab-panel active" id="tab-details">
+        <div class="section-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Application
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-title">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Planning details
+          </div>
+          <div class="field">
+            <label>Form Title</label>
+            <input class="fi" type="text" id="appRef" placeholder="e.g. Submit a Letter of Support" oninput="regen()">
+            <div class="hint">Shown at the top of the form as the main heading.</div>
+          </div>
+          <div class="field">
+            <label>Site / Development Description</label>
+            <input class="fi" type="text" id="siteDesc" placeholder="e.g. M&S Food Hall, Seaton" oninput="regen()">
+            <div class="hint">Used in the thank-you message and as the page title for the generated file. Not included in the letter text.</div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-title">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            Integration
+          </div>
+          <div class="field">
+            <label>Zapier Webhook URL</label>
+            <input class="fi" type="url" id="zapierUrl" placeholder="https://hooks.zapier.com/hooks/catch/..." oninput="regen()">
+            <button class="add-stmt-btn" id="testWebhookBtn" style="margin-top:8px;" onclick="testWebhook()" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+              Test Webhook
+            </button>
+            <div class="hint" id="testWebhookResult" style="display:none; margin-top:6px;"></div>
+            <div class="info-box">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Set up your Zap in Zapier first (Webhooks → Catch Hook), then paste the URL here. All form submissions POST to this endpoint. Use "Test Webhook" to send a sample submission and confirm it arrives in Zapier.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: PERSONAL DETAILS ── -->
+      <div class="tab-panel" id="tab-personal">
+        <div class="section-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Personal Details
+        </div>
+
+        <!-- Fixed required fields -->
+        <div class="field-group">
+          <div class="field-group-title">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Required fields — always included
+          </div>
+          <div class="info-box" style="margin-bottom:12px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            These fields are always required and cannot be removed from the form.
+          </div>
+          <div class="demo-fixed-field"><span class="demo-lock">🔒</span><span>Full name</span><span class="demo-req-badge">required</span></div>
+          <div class="demo-fixed-field"><span class="demo-lock">🔒</span><span>Email address</span><span class="demo-req-badge">required</span></div>
+          <div class="demo-fixed-field"><span class="demo-lock">🔒</span><span>Address line 1</span><span class="demo-req-badge">required</span></div>
+          <div class="demo-fixed-field"><span class="demo-lock">🔒</span><span>Address line 2</span><span class="demo-opt-badge">optional</span></div>
+          <div class="demo-fixed-field"><span class="demo-lock">🔒</span><span>Town / City</span><span class="demo-req-badge">required</span></div>
+          <div class="demo-fixed-field"><span class="demo-lock">🔒</span><span>Postcode</span><span class="demo-req-badge">required</span></div>
+        </div>
+
+        <!-- Age question -->
+        <div class="field-group">
+          <div class="field-group-title" style="justify-content:space-between;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Age question
+            </span>
+            <div class="pill-toggle" id="ageToggle" onclick="toggleDemo('age')" title="Enable or disable age question">
+              <div class="pill-track" id="ageToggleTrack"><div class="pill-thumb"></div></div>
+            </div>
+          </div>
+          <div id="ageFieldBlock" class="demo-field-disabled">
+            <div class="field">
+              <label>Question text</label>
+              <input class="fi" type="text" id="ageQuestion" value="What is your age?" oninput="regen()">
+            </div>
+            <div class="field">
+              <label>Options <span style="font-weight:400;font-size:11px;color:var(--ink-faint)">(edit or reorder as needed)</span></label>
+              <div id="ageOptionsContainer"></div>
+              <button class="add-stmt-btn" style="margin-top:6px;" onclick="addDemoOption('age')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add option
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gender question -->
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-group-title" style="justify-content:space-between;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="11" r="4"/><path d="M12 15v6M9 18h6"/></svg>
+              Gender question
+            </span>
+            <div class="pill-toggle" id="genderToggle" onclick="toggleDemo('gender')" title="Enable or disable gender question">
+              <div class="pill-track" id="genderToggleTrack"><div class="pill-thumb"></div></div>
+            </div>
+          </div>
+          <div id="genderFieldBlock" class="demo-field-disabled">
+            <div class="field">
+              <label>Question text</label>
+              <input class="fi" type="text" id="genderQuestion" value="How do you describe your gender?" oninput="regen()">
+            </div>
+            <div class="field">
+              <label>Options <span style="font-weight:400;font-size:11px;color:var(--ink-faint)">(edit or reorder as needed)</span></label>
+              <div id="genderOptionsContainer"></div>
+              <button class="add-stmt-btn" style="margin-top:6px;" onclick="addDemoOption('gender')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add option
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── TAB: STATEMENTS ── -->
+      <div class="tab-panel" id="tab-statements">
+        <div class="section-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Statements
+        </div>
+        <div id="stmtsDisabledNotice" style="display:none; background:var(--sand); border:1px solid var(--rule); border-radius:6px; padding:10px 12px; font-size:12px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5;">
+          Statements are <strong>off</strong>. The form will show only the comments box, which will be required. Toggle on in the nav bar to re-enable.
+        </div>
+        <div class="info-box" id="stmtsInfoBox" style="margin-bottom: 14px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Each statement gets a checkbox. Add multiple phrasings per statement — the form picks one at random, making every letter slightly different.
+        </div>
+        <div id="statementsContainer"></div>
+        <button class="add-stmt-btn" onclick="addStatement()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add support statement
+        </button>
+      </div>
+
+      <!-- ── TAB: LETTER COPY ── -->
+      <div class="tab-panel" id="tab-letter">
+        <div class="section-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Letter Copy
+        </div>
+
+        <!-- Preview/edit toggle -->
+        <div class="toggle-row" id="previewToggleRow">
+          <div class="toggle-row-left">
+            <div class="toggle-row-label">Letter preview &amp; edit step</div>
+            <div class="toggle-row-desc">When on, users see a formatted, editable version of their letter before submitting. When off, the form submits directly — best for simpler forms where you don't want users to see or change the letter.</div>
+          </div>
+          <div class="pill-toggle" id="previewToggle" onclick="togglePreviewEnabled()" title="Toggle preview step">
+            <div class="pill-track on" id="previewToggleTrack"><div class="pill-thumb"></div></div>
+          </div>
+        </div>
+
+        <div class="lc-divider"></div>
+
+        <!-- Opening paragraph -->
+        <div class="lc-field-block">
+          <div class="lc-field-header">
+            <div class="lc-field-meta">
+              <div class="lc-field-name">Opening paragraph</div>
+              <div class="lc-field-desc">The first line of the letter body, setting out why the person is writing. Appears directly after "Dear Officer" and the application reference.</div>
+            </div>
+            <div class="pill-toggle" id="openingToggle" onclick="toggleField('opening')" title="Enable or disable opening paragraph">
+              <div class="pill-track on" id="openingToggleTrack"><div class="pill-thumb"></div></div>
+            </div>
+          </div>
+          <div id="openingFieldWrap">
+            <textarea class="fi" id="openingPara" rows="2" oninput="regen()">I am writing to express my support for the above planning application.</textarea>
+          </div>
+        </div>
+
+        <!-- Statement intro -->
+        <div class="lc-field-block">
+          <div class="lc-field-header">
+            <div class="lc-field-meta">
+              <div class="lc-field-name">Statement introduction line</div>
+              <div class="lc-field-desc">Appears before the bullet list of selected support statements. Only shown in the letter if the user has ticked at least one statement.</div>
+            </div>
+            <div class="pill-toggle" id="stmtIntroToggle" onclick="toggleField('stmtIntro')" title="Enable or disable intro line">
+              <div class="pill-track on" id="stmtIntroToggleTrack"><div class="pill-thumb"></div></div>
+            </div>
+          </div>
+          <div id="stmtIntroFieldWrap">
+            <textarea class="fi" id="stmtIntro" rows="2" oninput="regen()">I believe this development will benefit our community in the following ways:</textarea>
+          </div>
+        </div>
+
+        <!-- Closing line -->
+        <div class="lc-field-block">
+          <div class="lc-field-header">
+            <div class="lc-field-meta">
+              <div class="lc-field-name">Closing line</div>
+              <div class="lc-field-desc">A call-to-action sentence that appears at the end of the letter, just before "Kind regards". Use it to make a direct request to the planning officer.</div>
+            </div>
+            <div class="pill-toggle" id="closingToggle" onclick="toggleField('closing')" title="Enable or disable closing line">
+              <div class="pill-track on" id="closingToggleTrack"><div class="pill-thumb"></div></div>
+            </div>
+          </div>
+          <div id="closingFieldWrap">
+            <textarea class="fi" id="closingLine" rows="2" oninput="regen()">I urge you to grant planning permission for this application.</textarea>
+          </div>
+        </div>
+
+        <!-- Comments prompt -->
+        <div class="lc-field-block" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+          <div class="lc-field-header">
+            <div class="lc-field-meta">
+              <div class="lc-field-name">Comments box prompt</div>
+              <div class="lc-field-desc">The instructional text shown above the free-text comments box on the form. Encourage users to add personal context — unique comments make each submission more effective.</div>
+            </div>
+          </div>
+          <textarea class="fi" id="commentsPrompt" rows="2" oninput="regen()">Please feel free to add any personal thoughts on why you support the application:</textarea>
+        </div>
+
+        <div class="lc-divider"></div>
+
+        <div class="lc-field-block">
+          <div class="lc-field-header">
+            <div class="lc-field-meta">
+              <div class="lc-field-name">Generate letter button text</div>
+              <div class="lc-field-desc">The label on the first submit button. When the preview/edit step is on, this triggers letter generation. Leave blank to use the default.</div>
+            </div>
+          </div>
+          <input class="fi" type="text" id="generateBtnText" placeholder="Default: Generate My Letter" oninput="regen()">
+        </div>
+
+        <div class="lc-field-block" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+          <div class="lc-field-header">
+            <div class="lc-field-meta">
+              <div class="lc-field-name">Submit button text</div>
+              <div class="lc-field-desc">The label on the final submit button — shown on the letter preview step (if enabled) or as the only button (if preview is off). Leave blank to use the default.</div>
+            </div>
+          </div>
+          <input class="fi" type="text" id="submitBtnText" placeholder="Default: Submit Letter" oninput="regen()">
+        </div>
+
+      </div>
+
+      <!-- ── TAB: DESIGN ── -->
+      <div class="tab-panel" id="tab-design">
+        <div class="section-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+          Design
+        </div>
+        <div class="field-group">
+          <div class="field-group-title">Colours</div>
+          <div class="field">
+            <label>Primary / Button colour</label>
+            <div class="color-field">
+              <div class="color-swatch" id="colorSwatch1">
+                <input type="color" id="primaryColorPicker" value="#4da16e" oninput="syncColor('primaryColor', this.value); regen()">
+              </div>
+              <input class="fi" type="text" id="primaryColor" value="#4da16e" oninput="syncColorPicker('primaryColorPicker', this.value); regen()" style="flex:1">
+            </div>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-group-title">Typography</div>
+          <div class="field">
+            <label>Google Font Name</label>
+            <input class="fi" type="text" id="fontName" value="" placeholder="e.g. Poppins, Lato, Roboto" oninput="regen()">
+            <div class="hint">Must be an exact Google Fonts name. <strong>Leave blank</strong> to inherit the font from the page — ideal for Squarespace, Wix, or any CMS where the form is embedded in a code block. The form will then automatically use whatever font the website is already using.</div>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-group-title">Button shape</div>
+          <div class="field">
+            <label>Corner radius</label>
+            <select class="fi" id="btnRadius" onchange="regen()">
+              <option value="24px">Pill — fully rounded</option>
+              <option value="8px" selected>Rounded — 8px</option>
+              <option value="4px">Slight — 4px</option>
+              <option value="0px">Square — no radius</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-group-title">Demographic questions</div>
+          <div class="field">
+            <label>Option layout</label>
+            <div class="layout-toggle-group" id="demoLayoutToggle">
+              <button class="layout-opt active" id="layoutOptVertical" onclick="setDemoLayout('vertical')">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="5" width="20" height="5" rx="2" fill="currentColor" opacity="0.2"/><rect x="4" y="5" width="20" height="5" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="13" width="20" height="5" rx="2" fill="currentColor" opacity="0.08"/><rect x="4" y="13" width="20" height="5" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="21" width="20" height="5" rx="2" fill="currentColor" opacity="0.08"/><rect x="4" y="21" width="20" height="5" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>
+                <span>Stacked</span>
+              </button>
+              <button class="layout-opt" id="layoutOptHorizontal" onclick="setDemoLayout('horizontal')">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="2" y="9" width="7" height="10" rx="2" fill="currentColor" opacity="0.2"/><rect x="2" y="9" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="10.5" y="9" width="7" height="10" rx="2" fill="currentColor" opacity="0.08"/><rect x="10.5" y="9" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="19" y="9" width="7" height="10" rx="2" fill="currentColor" opacity="0.08"/><rect x="19" y="9" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>
+                <span>Inline</span>
+              </button>
+            </div>
+            <div class="hint" style="margin-top:6px;">Stacked puts each option on its own row. Inline wraps them side by side — useful when there are many short options.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-panel" id="tab-consent">
+        <div class="section-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Consent
+        </div>
+        <div class="info-box" style="margin-bottom: 14px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          All consent checkboxes are required. Users must tick each one before generating their letter.
+        </div>
+        <div id="consentContainer"></div>
+        <button class="add-stmt-btn" onclick="addConsent()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add consent checkbox
+        </button>
+      </div>
+
+      <div class="tab-panel" id="tab-templates">
+        <div class="section-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Templates
+        </div>
+
+        <div id="templatesLocked">
+          <div class="info-box" style="margin-bottom:14px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            This tab is for internal team use — it holds saved form setups (e.g. for M&amp;S sites) so you don't have to rebuild the same form from scratch each time.
+          </div>
+          <div class="field">
+            <label>Team password</label>
+            <input class="fi" type="password" id="templatesPasswordInput" placeholder="Enter password" onkeydown="if(event.key==='Enter'){event.preventDefault(); checkTemplatesPassword();}">
+          </div>
+          <div class="hint" id="templatesPasswordError" style="display:none; color:var(--danger); margin-bottom:8px;">Incorrect password.</div>
+          <button class="add-stmt-btn" onclick="checkTemplatesPassword()">Unlock</button>
+        </div>
+
+        <div id="templatesUnlocked" style="display:none;">
+          <div class="info-box" style="margin-bottom:14px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Loading a template replaces every field in the builder (except the webhook URL, which is always left blank for you to fill in per client). Templates are saved in this browser only — use Export/Import to share them with teammates.
+          </div>
+          <div id="templatesContainer"></div>
+          <button class="add-stmt-btn" onclick="saveCurrentAsTemplate()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Save current setup as template
+          </button>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="add-stmt-btn" style="flex:1;" onclick="exportTemplates()">Export (.json)</button>
+            <button class="add-stmt-btn" style="flex:1;" onclick="document.getElementById('templatesImportInput').click()">Import (.json)</button>
+            <input type="file" id="templatesImportInput" accept="application/json" style="display:none" onchange="importTemplatesFile(this)">
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /config-panel-inner -->
+  </aside>
+
+  <!-- RIGHT: PREVIEW PANEL -->
+  <main class="preview-panel">
+    <div class="preview-toolbar">
+      <span class="preview-label">Preview</span>
+      <div class="view-toggle">
+        <button class="view-btn active" id="viewBtnForm" onclick="switchView('form')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Form
+        </button>
+        <button class="view-btn" id="viewBtnCode" onclick="switchView('code')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Code
+        </button>
+      </div>
+      <div class="preview-spacer"></div>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        Live preview
+      </div>
+    </div>
+
+    <div class="preview-content">
+      <!-- FORM PREVIEW VIEW -->
+      <div class="preview-view active" id="viewForm">
+        <div class="form-preview-wrap">
+          <div class="form-chrome">
+            <div class="form-chrome-bar">
+              <div class="chrome-dot"></div>
+              <div class="chrome-dot"></div>
+              <div class="chrome-dot"></div>
+              <div class="chrome-url">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                yourwebsite.com/support-form
+              </div>
+            </div>
+            <div class="form-preview-body" id="formPreviewBody">
+              <!-- rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CODE VIEW -->
+      <div class="preview-view" id="viewCode">
+        <div class="code-view">
+          <div class="code-toolbar">
+            <div class="code-filename">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: rgba(255,255,255,0.3)"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>support-form.html</span>
+            </div>
+            <div class="code-spacer"></div>
+            <button class="download-btn" onclick="downloadFile()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+            <button class="copy-btn" id="copyCodeBtn" onclick="copyCode()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy HTML
+            </button>
+          </div>
+          <textarea class="code-textarea" id="codeOutput" readonly spellcheck="false"></textarea>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════════ */
+let statements = [];
+
+let consents = [
+  'I have read and agree with the GDPR statement.',
+  'I have read and agree with the Support Submission Privacy Note.'
+];
+
+/* ══════════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════════ */
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+function switchView(name) {
+  document.querySelectorAll('.preview-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  document.getElementById('viewBtn' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════════════
+   RENDER STATEMENTS
+══════════════════════════════════════════════════════════ */
+function renderStatements() {
+  const c = document.getElementById('statementsContainer');
+  c.innerHTML = '';
+  statements.forEach((stmt, si) => {
+    const card = document.createElement('div');
+    card.className = 'stmt-card';
+    card.innerHTML = `
+      <div class="stmt-card-header" onclick="toggleStmt(${si})">
+        <svg class="stmt-drag-handle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+        <div class="stmt-number">${si+1}</div>
+        <input class="stmt-label-input" type="text" value="${esc(stmt.label)}"
+          onclick="event.stopPropagation()"
+          onchange="statements[${si}].label=this.value; regen()"
+          placeholder="Checkbox label shown on the form…">
+        <button class="stmt-toggle-btn ${stmt.open ? 'open' : ''}" onclick="event.stopPropagation(); toggleStmt(${si})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <button class="icon-btn" style="color:var(--danger)" onclick="event.stopPropagation(); removeStatement(${si})">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
+        </button>
+      </div>
+      <div class="stmt-body ${stmt.open ? 'open' : ''}" id="stmtBody-${si}">
+        <div style="font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:8px">
+          Phrasings — one chosen at random
+        </div>
+        <div id="variants-${si}"></div>
+        <button class="add-variant-btn" onclick="addVariant(${si})">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          add phrasing
+        </button>
+      </div>
+    `;
+    c.appendChild(card);
+    renderVariants(si);
+  });
+}
+
+function toggleStmt(si) {
+  statements[si].open = !statements[si].open;
+  const body = document.getElementById('stmtBody-' + si);
+  const btn = body.previousElementSibling.querySelector('.stmt-toggle-btn');
+  body.classList.toggle('open', statements[si].open);
+  btn.classList.toggle('open', statements[si].open);
+}
+
+function renderVariants(si) {
+  const vc = document.getElementById('variants-' + si);
+  if (!vc) return;
+  vc.innerHTML = '';
+  statements[si].variants.forEach((v, vi) => {
+    const row = document.createElement('div');
+    row.className = 'variant-row';
+    row.innerHTML = `
+      <div class="variant-badge">${vi+1}</div>
+      <textarea class="fi" onchange="statements[${si}].variants[${vi}]=this.value; regen()">${escHtml(v)}</textarea>
+      <button class="icon-btn" onclick="removeVariant(${si},${vi})" title="Remove phrasing">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    vc.appendChild(row);
+  });
+}
+
+function addVariant(si) {
+  statements[si].variants.push('');
+  renderStatements();
+  regen();
+  setTimeout(() => {
+    const vc = document.getElementById('variants-' + si);
+    const textareas = vc.querySelectorAll('textarea');
+    textareas[textareas.length - 1].focus();
+  }, 50);
+}
+
+function removeVariant(si, vi) {
+  if (statements[si].variants.length <= 1) return;
+  statements[si].variants.splice(vi, 1);
+  renderStatements();
+  regen();
+}
+
+function addStatement() {
+  const idx = statements.length;
+  statements.push({
+    key: 'reason' + (idx+1),
+    label: '',
+    open: true,
+    variants: ['', '']
+  });
+  renderStatements();
+  regen();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('.stmt-label-input');
+    inputs[inputs.length-1].focus();
+  }, 60);
+}
+
+function removeStatement(si) {
+  statements.splice(si, 1);
+  renderStatements();
+  regen();
+}
+
+/* ══════════════════════════════════════════════════════════
+   RENDER CONSENTS
+══════════════════════════════════════════════════════════ */
+function renderConsents() {
+  const c = document.getElementById('consentContainer');
+  c.innerHTML = '';
+  consents.forEach((text, i) => {
+    const row = document.createElement('div');
+    row.className = 'consent-row';
+    row.innerHTML = `
+      <div class="variant-badge">${i+1}</div>
+      <textarea class="fi" rows="2" onchange="consents[${i}]=this.value; regen()"
+        style="flex:1; font-size:12px; min-height:44px">${esc(text)}</textarea>
+      <button class="icon-btn" onclick="removeConsent(${i})">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    c.appendChild(row);
+  });
+}
+
+function addConsent() {
+  consents.push('');
+  renderConsents();
+  regen();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('.consent-row textarea');
+    inputs[inputs.length-1].focus();
+  }, 50);
+}
+
+function removeConsent(i) {
+  if (consents.length <= 1) return;
+  consents.splice(i, 1);
+  renderConsents();
+  regen();
+}
+
+/* ══════════════════════════════════════════════════════════
+   COLOR SYNC
+══════════════════════════════════════════════════════════ */
+function syncColor(textId, val) {
+  document.getElementById(textId).value = val;
+  document.getElementById('colorSwatch1').style.backgroundColor = val;
+}
+
+function syncColorPicker(pickerId, val) {
+  if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+    document.getElementById(pickerId).value = val;
+    document.getElementById('colorSwatch1').style.backgroundColor = val;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIVE FORM PREVIEW
+══════════════════════════════════════════════════════════ */
+function renderFormPreview() {
+  const appRef = gv('appRef') || 'XX/XXXX/XXX';
+  const siteDesc = gv('siteDesc') || 'this development';
+  const primaryColor = gv('primaryColor') || '#4da16e';
+  const openingPara = gv('openingPara') || '';
+  const commentsPrompt = gv('commentsPrompt') || 'Additional comments:';
+
+  let html = `
+    <div class="lp-title">${escHtml(appRef) || 'Your form title will appear here'}</div>
+
+    <div class="lp-section-head">Your details</div>
+
+    <div class="lp-field-row">
+      <div>
+        <div class="lp-label">Full name <span class="lp-req">(required)</span></div>
+        <input class="lp-input" type="text" placeholder="Jane Smith" disabled>
+      </div>
+      <div>
+        <div class="lp-label">Email <span class="lp-req">(required)</span></div>
+        <input class="lp-input" type="email" placeholder="jane@example.com" disabled>
+      </div>
+    </div>
+    <div>
+      <div class="lp-label">Address line 1 <span class="lp-req">(required)</span></div>
+      <input class="lp-input" type="text" placeholder="12 High Street" disabled style="width:100%; margin-bottom:6px">
+    </div>
+    <div class="lp-field-row">
+      <div>
+        <div class="lp-label">Town / City <span class="lp-req">(required)</span></div>
+        <input class="lp-input" type="text" placeholder="Seaton" disabled>
+      </div>
+      <div>
+        <div class="lp-label">Postcode <span class="lp-req">(required)</span></div>
+        <input class="lp-input" type="text" placeholder="EX12 2AB" disabled>
+      </div>
+    </div>
+  `;
+
+  if (ageEnabled || genderEnabled) {
+    if (ageEnabled) {
+      const aqText = gv('ageQuestion') || 'What is your age?';
+      html += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:10px 0 6px">${escHtml(aqText)}</p>`;
+      if (demoLayout === 'horizontal') {
+        html += `<div style="display:flex;flex-wrap:wrap;gap:5px 10px;margin-bottom:8px;">`;
+        ageOptions.forEach(o => {
+          html += `<div class="lp-check-item" style="margin-bottom:0;padding:6px 10px;flex-shrink:0;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
+        });
+        html += `</div>`;
+      } else {
+        ageOptions.forEach(o => {
+          html += `<div class="lp-check-item" style="margin-bottom:4px;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
+        });
+      }
+    }
+    if (genderEnabled) {
+      const gqText = gv('genderQuestion') || 'How do you describe your gender?';
+      html += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:12px 0 6px">${escHtml(gqText)}</p>`;
+      if (demoLayout === 'horizontal') {
+        html += `<div style="display:flex;flex-wrap:wrap;gap:5px 10px;margin-bottom:8px;">`;
+        genderOptions.forEach(o => {
+          html += `<div class="lp-check-item" style="margin-bottom:0;padding:6px 10px;flex-shrink:0;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
+        });
+        html += `</div>`;
+      } else {
+        genderOptions.forEach(o => {
+          html += `<div class="lp-check-item" style="margin-bottom:4px;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
+        });
+      }
+    }
+  }
+
+  if (statementsEnabled && statements.length > 0) {
+    html += `<div class="lp-section-head" style="margin-top:18px">I support this application because</div>
+    <p style="font-size:12px; color:var(--ink-soft); margin-bottom:10px">Tick as many as apply — your selected reasons will be included in your letter.</p>`;
+    statements.forEach(s => {
+      html += `<div class="lp-check-item">
+        <div class="lp-check"></div>
+        <div class="lp-check-label">${escHtml(s.label || 'Untitled statement')}</div>
+      </div>`;
+    });
+  }
+
+  const commentsLabel = statementsEnabled ? 'Additional comments' : 'Your comments';
+  const commentsOptional = statementsEnabled
+    ? `<span style="font-size:10px; font-weight:400; text-transform:none; letter-spacing:0; color:var(--ink-faint)">&nbsp;optional</span>`
+    : `<span style="font-size:10px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--accent)">&nbsp;required</span>`;
+
+  html += `
+    <div class="lp-section-head" style="margin-top:18px">${commentsLabel} ${commentsOptional}</div>
+    <p style="font-size:12px; color:var(--ink-soft); margin-bottom:8px">${escHtml(commentsPrompt)}</p>
+    <textarea class="lp-textarea" disabled placeholder="${statementsEnabled ? 'Your personal thoughts…' : 'Please share your thoughts… (required)'}"></textarea>
+  `;
+
+  if (consents.length > 0) {
+    html += `<div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--rule-light)">`;
+    consents.forEach(c => {
+      html += `<div class="lp-consent-item">
+        <div class="lp-check" style="width:14px;height:14px;border-radius:2px;flex-shrink:0"></div>
+        <span>${escHtml(c)}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<button class="lp-submit-btn" style="background:${primaryColor}" disabled>${escHtml(gv('generateBtnText') || (previewEnabled ? 'Generate My Letter →' : 'Submit My Support →'))}</button>`;
+
+  document.getElementById('formPreviewBody').innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════════════════
+   CODE GENERATION
+══════════════════════════════════════════════════════════ */
+function generateCode() {
+  const appRef = gv('appRef') || 'Support Form';
+  const siteDesc = gv('siteDesc') || '';
+  const zapierUrl = gv('zapierUrl') || 'https://hooks.zapier.com/hooks/catch/YOUR_HOOK/';
+  const primaryColor = gv('primaryColor') || '#4da16e';
+  const btnRadius = gv('btnRadius') || '20px';
+  const fontName = gv('fontName');
+  const openingPara = fieldToggles.openingEnabled ? (gv('openingPara') || 'I am writing to express my support for the above planning application.') : '';
+  const stmtIntro = fieldToggles.stmtIntroEnabled ? (gv('stmtIntro') || 'I believe this development will benefit our community in the following ways:') : '';
+  const closingLine = fieldToggles.closingEnabled ? (gv('closingLine') || 'I urge you to grant planning permission for this application.') : '';
+  const commentsPrompt = gv('commentsPrompt') || 'Please feel free to add any personal thoughts on why you support the application:';
+  const generateBtnText = gv('generateBtnText') || (previewEnabled ? 'Generate My Letter' : 'Submit My Support');
+  const submitBtnText = gv('submitBtnText') || 'Submit Letter';
+
+  const fontFamilyRule = fontName ? `\n      font-family: "${fontName}", sans-serif;` : '';
+  const fontLinkTag = fontName ? `\n  <link href="https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}&display=swap" rel="stylesheet">` : '';
+
+  const reasonOptionsLines = statementsEnabled ? statements.map(s =>
+    `  ${s.key}: [\n    ${s.variants.map(v => `"${jsEsc(v)}"`).join(',\n    ')}\n  ]`
+  ).join(',\n') : '';
+
+  const checkboxHTML = statementsEnabled ? statements.map(s =>
+    `    <label><input type="checkbox" name="reasons" value="${s.key}"> ${escHtml(s.label)}</label><br>`
+  ).join('\n') : '';
+
+  const stmtSectionHTML = statementsEnabled && statements.length > 0 ? `
+    <h4>I support this application because:</h4>
+    <p>Tick as many as apply — your selected reasons will be included in your letter:</p>
+
+${checkboxHTML}
+` : '';
+
+  const commentsTitle = statementsEnabled ? 'Additional comments (optional)' : 'Your comments';
+  const commentsRequired = statementsEnabled ? '' : ' required';
+
+  // Demographics
+  const ageQ = gv('ageQuestion') || 'What is your age?';
+  const genderQ = gv('genderQuestion') || 'How do you describe your gender?';
+
+  const ageSectionHTML = ageEnabled ? `
+    <div class="sub-heading">${escHtml(ageQ)}</div>
+    ${demoLayout === 'horizontal'
+      ? `<div style="display:flex; flex-wrap:wrap; gap:6px 16px; margin-bottom:10px;">\n    ${ageOptions.map(o => `<label style="margin:0;"><input type="radio" name="age_group" value="${escHtml(o)}"> ${escHtml(o)}</label>`).join('\n    ')}\n    </div>`
+      : ageOptions.map(o => `<label><input type="radio" name="age_group" value="${escHtml(o)}"> ${escHtml(o)}</label><br>`).join('\n    ')
+    }
+  ` : '';
+
+  const genderSectionHTML = genderEnabled ? `
+    <div class="sub-heading">${escHtml(genderQ)}</div>
+    ${demoLayout === 'horizontal'
+      ? `<div style="display:flex; flex-wrap:wrap; gap:6px 16px; margin-bottom:10px;">\n    ${genderOptions.map(o => `<label style="margin:0;"><input type="radio" name="gender" value="${escHtml(o)}"> ${escHtml(o)}</label>`).join('\n    ')}\n    </div>`
+      : genderOptions.map(o => `<label><input type="radio" name="gender" value="${escHtml(o)}"> ${escHtml(o)}</label><br>`).join('\n    ')
+    }
+  ` : '';
+
+  const demoSectionHTML = (ageEnabled || genderEnabled) ? `
+    ${ageSectionHTML}
+    ${genderSectionHTML}
+  ` : '';
+
+  const consentHTML = consents.map(c =>
+    `    <label><input type="checkbox" required> ${escHtml(c)} (required)</label><br>`
+  ).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${escHtml(siteDesc) || 'Support Form'}</title>${fontLinkTag}
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: #ffffff;
+      margin: 0;
+      padding: 0;${fontFamilyRule}
+    }
+    .section-box {
+      background: #F5F5F5;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 700px;
+      margin: 20px auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    h4 { margin-top: 20px; margin-bottom: 8px; }
+    .sub-heading { font-weight: 500; margin: 20px 0 8px; }
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 10px;
+      margin-right: 16px;
+      font-weight: 500;
+    }
+    input[type="text"], input[type="email"], textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #f0f0f0;
+      margin-bottom: 4px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    input[type="text"], input[type="email"] { margin-bottom: 12px; }
+    .field-error {
+      display: none;
+      color: #c0392b;
+      font-size: 12px;
+      margin-bottom: 10px;
+      margin-top: -8px;
+      padding: 6px 10px;
+      background: #fdf0ee;
+      border-left: 3px solid #c0392b;
+      border-radius: 4px;
+    }
+    .field-error.visible { display: block; }
+    input.invalid {
+      border-color: #c0392b !important;
+      background: #fff8f7 !important;
+    }
+    input[type="checkbox"] { margin-right: 8px; }
+    .req-marker { font-size: 11px; font-weight: 400; color: #888; margin-left: 4px; }
+    button {
+      padding: 14px 24px;
+      margin-bottom: 20px;
+      background: ${primaryColor};
+      color: #fff;
+      border: none;
+      border-radius: ${btnRadius};
+      cursor: pointer;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    button:hover { opacity: 0.88; }
+    #letter-preview {
+      min-height: 380px;
+      border: 1px solid #ccc;
+      padding: 16px;
+      border-radius: 8px;
+      background: #fff;
+      margin-bottom: 24px;
+    }
+    #preview-section, #thank-you-section { display: none; }
+    ul { margin-left: 20px; }
+    #additionalcomments { height: 180px; }
+  </style>
+</head>
+<body>
+
+<div id="letter-form-container" class="section-box">
+  <h4>${escHtml(appRef)}</h4>
+  <div class="sub-heading">About you (required)</div>
+
+  <form id="support-form" onsubmit="${previewEnabled ? 'generatePreview' : 'directSubmit'}(event)">
+    <label for="name">Your Name <span class="req-marker">(required)</span></label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="email">Your Email <span class="req-marker">(required)</span></label>
+    <input type="email" id="email" name="email" required onblur="validateEmail(this)" oninput="clearEmailError(this)">
+    <div class="field-error" id="email-error">Please enter a valid email address (e.g. name@example.com).</div>
+
+    <label for="address1">Address Line 1 <span class="req-marker">(required)</span></label>
+    <input type="text" id="address1" name="address1" required>
+
+    <label for="address2">Address Line 2</label>
+    <input type="text" id="address2" name="address2">
+
+    <label for="citytown">City/Town <span class="req-marker">(required)</span></label>
+    <input type="text" id="citytown" name="citytown" required>
+
+    <label for="postcode">Postcode <span class="req-marker">(required)</span></label>
+    <input type="text" id="postcode" name="postcode" required>
+
+${demoSectionHTML}
+${stmtSectionHTML}
+    <h4>${commentsTitle}</h4>
+    <p>${escHtml(commentsPrompt)}</p>
+    <textarea id="additionalcomments" name="additionalcomments"${commentsRequired}></textarea>
+    <br><br>
+
+${consentHTML}
+
+    <button type="submit">${escHtml(generateBtnText)}</button>
+  </form>
+</div>
+
+${previewEnabled ? `<div id="preview-section" class="section-box">
+  <h4>Preview and Edit Your Letter</h4>
+  <p>Feel free to edit and personalise your letter as you wish.</p>
+  <form id="final-form" onsubmit="finaliseSubmission(event)">
+    <div id="letter-preview" contenteditable="true"></div>
+    <input type="hidden" id="hidden-name" name="name">
+    <input type="hidden" id="hidden-email" name="email">
+    <button type="submit">${escHtml(submitBtnText)}</button>
+  </form>
+</div>` : ''}
+
+<div id="thank-you-section" class="section-box">
+  <h4>Thank you for your support!</h4>
+  <p>Your letter of support has been successfully submitted.</p>
+  <p>A copy will be sent to the email address you provided.</p>
+</div>
+
+<script>
+const reasonOptions = {
+${reasonOptionsLines}
+};
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function isValidEmail(email) {
+  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(email.trim());
+}
+
+function validateEmail(input) {
+  const error = document.getElementById('email-error');
+  if (!input.value.trim() || !isValidEmail(input.value)) {
+    input.classList.add('invalid');
+    error.classList.add('visible');
+    return false;
+  }
+  input.classList.remove('invalid');
+  error.classList.remove('visible');
+  return true;
+}
+
+function clearEmailError(input) {
+  if (isValidEmail(input.value)) {
+    input.classList.remove('invalid');
+    document.getElementById('email-error').classList.remove('visible');
+  }
+}
+
+function buildLetterHTML(name, reasons, additional) {
+  let html = '';
+  const openingPara = ${JSON.stringify(openingPara)};
+  const stmtIntro = ${JSON.stringify(stmtIntro)};
+  const closingLine = ${JSON.stringify(closingLine)};
+
+  if (openingPara) {
+    html += '<p>Dear Officer,</p>';
+    html += '<p>' + openingPara + '</p>';
+  }
+
+  if (reasons.length > 0) {
+    if (stmtIntro) html += '<p>' + stmtIntro + '</p>';
+    html += '<ul>';
+    reasons.forEach(key => { html += '<li>' + pickRandom(reasonOptions[key]) + '</li>'; });
+    html += '</ul>';
+  }
+  if (additional) {
+    html += reasons.length > 0 ? '<p>I would also like to mention: ' + additional + '</p>' : '<p>' + additional + '</p>';
+  }
+  if (closingLine) html += '<p>' + closingLine + '</p>';
+  html += '<p>Kind regards,<br>' + name + '</p>';
+  return html;
+}
+
+${previewEnabled ? `
+function generatePreview(event) {
+  event.preventDefault();
+  const emailInput = document.getElementById('email');
+  if (!validateEmail(emailInput)) {
+    emailInput.focus();
+    return;
+  }
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const additional = document.getElementById('additionalcomments').value.trim();
+  const reasons = Array.from(document.querySelectorAll('input[name="reasons"]:checked')).map(cb => cb.value);
+  document.getElementById('letter-preview').innerHTML = buildLetterHTML(name, reasons, additional);
+  document.getElementById('hidden-name').value = name;
+  document.getElementById('hidden-email').value = email;
+  document.getElementById('letter-form-container').style.display = 'none';
+  document.getElementById('preview-section').style.display = 'block';
+  document.getElementById('preview-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function finaliseSubmission(event) {
+  event.preventDefault();
+  const letterHTML = document.getElementById('letter-preview').innerHTML.trim();
+  if (!letterHTML) { alert('Your letter cannot be empty.'); return; }
+  const name = document.getElementById('hidden-name').value;
+  const email = document.getElementById('hidden-email').value;
+  submitToZapier(name, email, letterHTML);
+}
+` : `
+function directSubmit(event) {
+  event.preventDefault();
+  const emailInput = document.getElementById('email');
+  if (!validateEmail(emailInput)) {
+    emailInput.focus();
+    return;
+  }
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const additional = document.getElementById('additionalcomments').value.trim();
+  const reasons = Array.from(document.querySelectorAll('input[name="reasons"]:checked')).map(cb => cb.value);
+  const letterHTML = buildLetterHTML(name, reasons, additional);
+  submitToZapier(name, email, letterHTML);
+}
+`}
+
+function submitToZapier(name, email, letterHTML) {
+  const address1 = document.getElementById('address1').value.trim();
+  const address2 = document.getElementById('address2').value.trim();
+  const citytown = document.getElementById('citytown').value.trim();
+  const postcode = document.getElementById('postcode').value.trim();
+  const additional = document.getElementById('additionalcomments').value.trim();
+  const reasons = Array.from(document.querySelectorAll('input[name="reasons"]:checked')).map(cb => cb.value);
+  const ageGroup = Array.from(document.querySelectorAll('input[name="age_group"]:checked')).map(cb => cb.value).join('; ');
+  const gender = Array.from(document.querySelectorAll('input[name="gender"]:checked')).map(cb => cb.value).join('; ');
+  const formData = new URLSearchParams({ name, email, address1, address2, citytown, postcode, additionalcomments: additional, reasons: reasons.join('; '), age_group: ageGroup, gender, letter: letterHTML });
+  fetch('${jsEsc(zapierUrl)}', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
+    .then(res => {
+      if (!res.ok) throw new Error('Network error');
+      ${previewEnabled ? "document.getElementById('preview-section').style.display = 'none';" : "document.getElementById('letter-form-container').style.display = 'none';"}
+      document.getElementById('thank-you-section').style.display = 'block';
+      document.getElementById('thank-you-section').scrollIntoView({ behavior: 'smooth' });
+    })
+    .catch(err => { alert('There was an error submitting the form. Please try again.'); console.error(err); });
+}
+<\/script>
+</body>
+</html>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════ */
+function gv(id) { return document.getElementById(id)?.value.trim() || ''; }
+function esc(s) { return (s||'').replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function jsEsc(s) { return (s||'').replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$/g,'\\$').replace(/'/g,"\\'"); }
+
+function regen() {
+  const code = generateCode();
+  const ta = document.getElementById('codeOutput');
+  if (ta) ta.value = code;
+  renderFormPreview();
+  // sync color swatch
+  const col = gv('primaryColor') || '#4da16e';
+  document.getElementById('colorSwatch1').style.backgroundColor = col;
+}
+
+function copyCode() {
+  const ta = document.getElementById('codeOutput');
+  ta.select();
+  document.execCommand('copy');
+  const btn = document.getElementById('copyCodeBtn');
+  const hdrBtns = document.querySelectorAll('.hdr-btn-accent');
+  btn.textContent = '✓ Copied!';
+  btn.classList.add('copied');
+  hdrBtns.forEach(b => b.textContent = '✓ Copied!');
+  setTimeout(() => {
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy HTML`;
+    btn.classList.remove('copied');
+    hdrBtns.forEach(b => {
+      b.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy HTML`;
+    });
+  }, 2200);
+}
+
+function downloadFile() {
+  const code = document.getElementById('codeOutput').value;
+  const appRef = (gv('siteDesc') || 'form').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  const blob = new Blob([code], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `support-form-${appRef}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function previewInNewTab() {
+  let code = document.getElementById('codeOutput').value;
+  // If no custom font is set, inject Poppins for the preview only
+  // so it renders nicely — the downloadable code stays font-free
+  // for CMS inheritance (e.g. Squarespace)
+  const fontName = document.getElementById('fontName').value.trim();
+  if (!fontName) {
+    code = code.replace(
+      '</head>',
+      '  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">\n  <style>body { font-family: "Poppins", sans-serif; }</style>\n</head>'
+    );
+  }
+  const blob = new Blob([code], { type: 'text/html' });
+  window.open(URL.createObjectURL(blob), '_blank');
+}
+
+async function testWebhook() {
+  const btn = document.getElementById('testWebhookBtn');
+  const result = document.getElementById('testWebhookResult');
+  const url = gv('zapierUrl');
+
+  if (!url) {
+    result.style.color = 'var(--danger)';
+    result.textContent = 'Enter a webhook URL above first.';
+    result.style.display = 'block';
+    return;
+  }
+
+  const originalLabel = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.textContent = 'Sending test…';
+  result.style.display = 'none';
+
+  const testData = new URLSearchParams({
+    name: 'Test Submission',
+    email: 'test@example.com',
+    address1: '123 Test Street',
+    address2: '',
+    citytown: 'Testville',
+    postcode: 'TE5T 1NG',
+    additionalcomments: 'This is a test submission sent from the Gether Dashboard to confirm the webhook is working.',
+    reasons: '',
+    age_group: '',
+    gender: '',
+    letter: '<p>This is a test letter, sent to confirm your webhook connection.</p>',
+    test: 'true'
+  });
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: testData.toString()
+    });
+    if (res.ok) {
+      result.style.color = 'var(--success)';
+      result.textContent = '✓ Test sent successfully — check your Zap\'s history to confirm it arrived.';
+    } else {
+      result.style.color = 'var(--danger)';
+      result.textContent = `✗ Webhook responded with an error (status ${res.status}). Double-check the URL.`;
+    }
+  } catch (err) {
+    result.style.color = 'var(--danger)';
+    result.textContent = '✗ Could not reach that URL. Double-check it\'s correct and that your Zap is switched on.';
+  }
+
+  result.style.display = 'block';
+  btn.disabled = false;
+  btn.style.opacity = '';
+  btn.innerHTML = originalLabel;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DEMOGRAPHICS
+══════════════════════════════════════════════════════════ */
+let ageEnabled = false;
+let genderEnabled = false;
+let demoLayout = 'vertical';
+
+function setDemoLayout(layout) {
+  demoLayout = layout;
+  document.getElementById('layoutOptVertical').classList.toggle('active', layout === 'vertical');
+  document.getElementById('layoutOptHorizontal').classList.toggle('active', layout === 'horizontal');
+  regen();
+}
+
+let ageOptions = ['Under 18', '18–24', '25–34', '35–44', '45–54', '55–64', '65–74', '75 or over'];
+let genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
+
+function renderDemoOptions(type) {
+  const arr = type === 'age' ? ageOptions : genderOptions;
+  const container = document.getElementById(type + 'OptionsContainer');
+  container.innerHTML = '';
+  arr.forEach((opt, i) => {
+    const row = document.createElement('div');
+    row.className = 'demo-option-row';
+    row.innerHTML = `
+      <div class="variant-badge">${i+1}</div>
+      <input class="fi" type="text" value="${esc(opt)}"
+        onchange="${type}Options[${i}]=this.value; regen()"
+        placeholder="Option text…">
+      <button class="icon-btn" onclick="removeDemoOption('${type}',${i})">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function addDemoOption(type) {
+  if (type === 'age') ageOptions.push('');
+  else genderOptions.push('');
+  renderDemoOptions(type);
+  regen();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#' + type + 'OptionsContainer input');
+    inputs[inputs.length - 1].focus();
+  }, 50);
+}
+
+function removeDemoOption(type, i) {
+  if (type === 'age') { if (ageOptions.length <= 1) return; ageOptions.splice(i, 1); }
+  else { if (genderOptions.length <= 1) return; genderOptions.splice(i, 1); }
+  renderDemoOptions(type);
+  regen();
+}
+
+function syncDemoEnabledUI(type) {
+  if (type === 'age') {
+    document.getElementById('ageToggleTrack').classList.toggle('on', ageEnabled);
+    document.getElementById('ageFieldBlock').classList.toggle('demo-field-disabled', !ageEnabled);
+  } else {
+    document.getElementById('genderToggleTrack').classList.toggle('on', genderEnabled);
+    document.getElementById('genderFieldBlock').classList.toggle('demo-field-disabled', !genderEnabled);
+  }
+}
+
+function toggleDemo(type) {
+  if (type === 'age') ageEnabled = !ageEnabled;
+  else genderEnabled = !genderEnabled;
+  syncDemoEnabledUI(type);
+  regen();
+}
+
+
+let statementsEnabled = true;
+let previewEnabled = true;
+const fieldToggles = {
+  openingEnabled: true,
+  stmtIntroEnabled: true,
+  closingEnabled: true
+};
+
+function syncPreviewEnabledUI() {
+  document.getElementById('previewToggleTrack').classList.toggle('on', previewEnabled);
+  document.getElementById('previewToggleRow').classList.toggle('toggle-off', !previewEnabled);
+}
+
+function togglePreviewEnabled() {
+  previewEnabled = !previewEnabled;
+  syncPreviewEnabledUI();
+
+  // When turning preview off, auto-disable opening para, stmt intro and closing line
+  if (!previewEnabled) {
+    ['opening', 'stmtIntro', 'closing'].forEach(name => {
+      const m = fieldToggleMap[name];
+      if (fieldToggles[m.flag]) {
+        fieldToggles[m.flag] = false;
+        document.getElementById(m.trackId).classList.remove('on');
+        document.getElementById(m.wrapId).parentElement.classList.add('field-disabled');
+      }
+    });
+  }
+
+  regen();
+}
+
+const fieldToggleMap = {
+  opening:   { flag: 'openingEnabled',   trackId: 'openingToggleTrack',   wrapId: 'openingFieldWrap' },
+  stmtIntro: { flag: 'stmtIntroEnabled', trackId: 'stmtIntroToggleTrack', wrapId: 'stmtIntroFieldWrap' },
+  closing:   { flag: 'closingEnabled',   trackId: 'closingToggleTrack',   wrapId: 'closingFieldWrap' }
+};
+
+function syncFieldToggleUI(name) {
+  const m = fieldToggleMap[name];
+  if (!m) return;
+  const on = fieldToggles[m.flag];
+  document.getElementById(m.trackId).classList.toggle('on', on);
+  const wrap = document.getElementById(m.wrapId);
+  wrap.parentElement.classList.toggle('field-disabled', !on);
+}
+
+function toggleField(name) {
+  const m = fieldToggleMap[name];
+  if (!m) return;
+  fieldToggles[m.flag] = !fieldToggles[m.flag];
+  syncFieldToggleUI(name);
+  regen();
+}
+
+function syncStatementsEnabledUI() {
+  const track = document.getElementById('stmtsToggleTrack');
+  const navTab = document.getElementById('stmtsNavTab');
+  const panel = document.getElementById('tab-statements');
+  const notice = document.getElementById('stmtsDisabledNotice');
+  const infoBox = document.getElementById('stmtsInfoBox');
+  const stmtsContainer = document.getElementById('statementsContainer');
+  const addBtn = panel.querySelector('.add-stmt-btn');
+
+  track.classList.toggle('on', statementsEnabled);
+  navTab.classList.toggle('stmts-disabled', !statementsEnabled);
+
+  notice.style.display = statementsEnabled ? 'none' : 'block';
+  infoBox.style.display = statementsEnabled ? 'flex' : 'none';
+  stmtsContainer.style.opacity = statementsEnabled ? '1' : '0.35';
+  stmtsContainer.style.pointerEvents = statementsEnabled ? '' : 'none';
+  addBtn.style.opacity = statementsEnabled ? '1' : '0.35';
+  addBtn.style.pointerEvents = statementsEnabled ? '' : 'none';
+}
+
+function toggleStatementsEnabled() {
+  statementsEnabled = !statementsEnabled;
+  syncStatementsEnabledUI();
+  regen();
+}
+
+/* ══════════════════════════════════════════════════════════
+   TEMPLATES (pre-saved form setups)
+══════════════════════════════════════════════════════════ */
+const TEMPLATES_PASSWORD = 'gether2026';
+const TEMPLATES_STORAGE_KEY = 'getherTemplates';
+let templates = [];
+
+function loadTemplatesFromStorage() {
+  try {
+    templates = JSON.parse(localStorage.getItem(TEMPLATES_STORAGE_KEY) || '[]');
+  } catch (e) {
+    templates = [];
+  }
+}
+
+function saveTemplatesToStorage() {
+  localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+}
+
+function checkTemplatesPassword() {
+  const input = document.getElementById('templatesPasswordInput');
+  const err = document.getElementById('templatesPasswordError');
+  if (input.value === TEMPLATES_PASSWORD) {
+    document.getElementById('templatesLocked').style.display = 'none';
+    document.getElementById('templatesUnlocked').style.display = 'block';
+    err.style.display = 'none';
+    input.value = '';
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+function renderTemplates() {
+  const c = document.getElementById('templatesContainer');
+  if (!c) return;
+  c.innerHTML = '';
+  if (templates.length === 0) {
+    c.innerHTML = '<div class="hint" style="margin-bottom:12px;">No saved templates yet. Set up a form the way you like it on the other tabs, then click "Save current setup as template" below.</div>';
+    return;
+  }
+  templates.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'stmt-card';
+    row.innerHTML = `
+      <div class="stmt-card-header" style="cursor:default;">
+        <div class="stmt-number">${i+1}</div>
+        <div class="stmt-label-input" style="pointer-events:none;">${escHtml(t.name)}</div>
+        <button class="icon-btn add" title="Load this template" onclick="loadTemplate(${i})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        </button>
+        <button class="icon-btn" style="color:var(--danger)" title="Delete this template" onclick="deleteTemplate(${i})">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
+        </button>
+      </div>
+    `;
+    c.appendChild(row);
+  });
+}
+
+function collectCurrentConfig() {
+  return {
+    appRef: gv('appRef'),
+    siteDesc: gv('siteDesc'),
+    primaryColor: gv('primaryColor') || '#4da16e',
+    fontName: gv('fontName'),
+    btnRadius: gv('btnRadius') || '8px',
+    demoLayout: demoLayout,
+    statementsEnabled: statementsEnabled,
+    statements: JSON.parse(JSON.stringify(statements)),
+    previewEnabled: previewEnabled,
+    fieldToggles: JSON.parse(JSON.stringify(fieldToggles)),
+    openingPara: gv('openingPara'),
+    stmtIntro: gv('stmtIntro'),
+    closingLine: gv('closingLine'),
+    commentsPrompt: gv('commentsPrompt'),
+    generateBtnText: gv('generateBtnText'),
+    submitBtnText: gv('submitBtnText'),
+    ageEnabled: ageEnabled,
+    ageQuestion: gv('ageQuestion'),
+    ageOptions: ageOptions.slice(),
+    genderEnabled: genderEnabled,
+    genderQuestion: gv('genderQuestion'),
+    genderOptions: genderOptions.slice(),
+    consents: consents.slice()
+  };
+}
+
+function applyConfig(cfg) {
+  document.getElementById('appRef').value = cfg.appRef || '';
+  document.getElementById('siteDesc').value = cfg.siteDesc || '';
+  document.getElementById('zapierUrl').value = ''; // always left blank — fill in per client
+  document.getElementById('primaryColor').value = cfg.primaryColor || '#4da16e';
+  document.getElementById('primaryColorPicker').value = cfg.primaryColor || '#4da16e';
+  document.getElementById('fontName').value = cfg.fontName || '';
+  document.getElementById('btnRadius').value = cfg.btnRadius || '8px';
+
+  demoLayout = cfg.demoLayout || 'vertical';
+  document.getElementById('layoutOptVertical').classList.toggle('active', demoLayout === 'vertical');
+  document.getElementById('layoutOptHorizontal').classList.toggle('active', demoLayout === 'horizontal');
+
+  statements = (cfg.statements && cfg.statements.length)
+    ? JSON.parse(JSON.stringify(cfg.statements))
+    : [{ key: 'reason1', label: '', open: true, variants: ['', ''] }];
+  renderStatements();
+
+  statementsEnabled = cfg.statementsEnabled !== false;
+  syncStatementsEnabledUI();
+
+  previewEnabled = cfg.previewEnabled !== false;
+  syncPreviewEnabledUI();
+
+  fieldToggles.openingEnabled = !!cfg.fieldToggles?.openingEnabled;
+  fieldToggles.stmtIntroEnabled = !!cfg.fieldToggles?.stmtIntroEnabled;
+  fieldToggles.closingEnabled = !!cfg.fieldToggles?.closingEnabled;
+  syncFieldToggleUI('opening');
+  syncFieldToggleUI('stmtIntro');
+  syncFieldToggleUI('closing');
+
+  document.getElementById('openingPara').value = cfg.openingPara || '';
+  document.getElementById('stmtIntro').value = cfg.stmtIntro || '';
+  document.getElementById('closingLine').value = cfg.closingLine || '';
+  document.getElementById('commentsPrompt').value = cfg.commentsPrompt || '';
+  document.getElementById('generateBtnText').value = cfg.generateBtnText || '';
+  document.getElementById('submitBtnText').value = cfg.submitBtnText || '';
+
+  ageEnabled = !!cfg.ageEnabled;
+  document.getElementById('ageQuestion').value = cfg.ageQuestion || 'What is your age?';
+  ageOptions = (cfg.ageOptions && cfg.ageOptions.length) ? cfg.ageOptions.slice() : ageOptions;
+  renderDemoOptions('age');
+  syncDemoEnabledUI('age');
+
+  genderEnabled = !!cfg.genderEnabled;
+  document.getElementById('genderQuestion').value = cfg.genderQuestion || 'How do you describe your gender?';
+  genderOptions = (cfg.genderOptions && cfg.genderOptions.length) ? cfg.genderOptions.slice() : genderOptions;
+  renderDemoOptions('gender');
+  syncDemoEnabledUI('gender');
+
+  consents = (cfg.consents && cfg.consents.length) ? cfg.consents.slice() : consents;
+  renderConsents();
+
+  regen();
+}
+
+function saveCurrentAsTemplate() {
+  const name = prompt('Name this template (e.g. "M&S — standard support form"):');
+  if (!name || !name.trim()) return;
+  templates.push({ name: name.trim(), config: collectCurrentConfig() });
+  saveTemplatesToStorage();
+  renderTemplates();
+}
+
+function loadTemplate(i) {
+  const t = templates[i];
+  if (!t) return;
+  if (!confirm(`Load "${t.name}"? This replaces every field currently in the builder (the webhook URL is left blank).`)) return;
+  applyConfig(t.config);
+  switchTab('details', document.querySelector('.nav-tab[data-tab="details"]'));
+}
+
+function deleteTemplate(i) {
+  const t = templates[i];
+  if (!t) return;
+  if (!confirm(`Delete template "${t.name}"? This cannot be undone.`)) return;
+  templates.splice(i, 1);
+  saveTemplatesToStorage();
+  renderTemplates();
+}
+
+function exportTemplates() {
+  const blob = new Blob([JSON.stringify(templates, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gether-templates.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importTemplatesFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const imported = JSON.parse(reader.result);
+      if (!Array.isArray(imported)) throw new Error('Invalid file');
+      templates = templates.concat(imported);
+      saveTemplatesToStorage();
+      renderTemplates();
+      alert(`Imported ${imported.length} template(s).`);
+    } catch (e) {
+      alert('Could not read that file — make sure it\'s a templates JSON file exported from this tool.');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+document.getElementById('colorSwatch1').style.backgroundColor = '#4da16e';
+// Init toggle track to ON
+document.getElementById('stmtsToggleTrack').classList.add('on');
+statements = [{ key: 'reason1', label: '', open: true, variants: ['', ''] }];
+renderStatements();
+renderConsents();
+renderDemoOptions('age');
+renderDemoOptions('gender');
+loadTemplatesFromStorage();
+renderTemplates();
+regen();
+</script>
+</body>
+</html>
