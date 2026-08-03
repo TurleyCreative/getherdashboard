@@ -1304,9 +1304,14 @@ textarea.fi { resize: vertical; min-height: 60px; }
           <div class="field">
             <label>Zapier Webhook URL</label>
             <input class="fi" type="url" id="zapierUrl" placeholder="https://hooks.zapier.com/hooks/catch/..." oninput="regen()">
+            <button class="add-stmt-btn" id="testWebhookBtn" style="margin-top:8px;" onclick="testWebhook()" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+              Test Webhook
+            </button>
+            <div class="hint" id="testWebhookResult" style="display:none; margin-top:6px;"></div>
             <div class="info-box">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              Set up your Zap in Zapier first (Webhooks → Catch Hook), then paste the URL here. All form submissions POST to this endpoint.
+              Set up your Zap in Zapier first (Webhooks → Catch Hook), then paste the URL here. All form submissions POST to this endpoint. Use "Test Webhook" to send a sample submission and confirm it arrives in Zapier.
             </div>
           </div>
         </div>
@@ -2388,6 +2393,63 @@ function previewInNewTab() {
   }
   const blob = new Blob([code], { type: 'text/html' });
   window.open(URL.createObjectURL(blob), '_blank');
+}
+
+async function testWebhook() {
+  const btn = document.getElementById('testWebhookBtn');
+  const result = document.getElementById('testWebhookResult');
+  const url = gv('zapierUrl');
+
+  if (!url) {
+    result.style.color = 'var(--danger)';
+    result.textContent = 'Enter a webhook URL above first.';
+    result.style.display = 'block';
+    return;
+  }
+
+  const originalLabel = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.textContent = 'Sending test…';
+  result.style.display = 'none';
+
+  const testData = new URLSearchParams({
+    name: 'Test Submission',
+    email: 'test@example.com',
+    address1: '123 Test Street',
+    address2: '',
+    citytown: 'Testville',
+    postcode: 'TE5T 1NG',
+    additionalcomments: 'This is a test submission sent from the Gether Dashboard to confirm the webhook is working.',
+    reasons: '',
+    age_group: '',
+    gender: '',
+    letter: '<p>This is a test letter, sent to confirm your webhook connection.</p>',
+    test: 'true'
+  });
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: testData.toString()
+    });
+    if (res.ok) {
+      result.style.color = 'var(--success)';
+      result.textContent = '✓ Test sent successfully — check your Zap\'s history to confirm it arrived.';
+    } else {
+      result.style.color = 'var(--danger)';
+      result.textContent = `✗ Webhook responded with an error (status ${res.status}). Double-check the URL.`;
+    }
+  } catch (err) {
+    result.style.color = 'var(--danger)';
+    result.textContent = '✗ Could not reach that URL. Double-check it\'s correct and that your Zap is switched on.';
+  }
+
+  result.style.display = 'block';
+  btn.disabled = false;
+  btn.style.opacity = '';
+  btn.innerHTML = originalLabel;
 }
 
 /* ══════════════════════════════════════════════════════════
