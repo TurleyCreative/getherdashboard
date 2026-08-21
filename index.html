@@ -2103,17 +2103,18 @@ ${checkboxHTML}
     h4 { margin-top: 20px; margin-bottom: 8px; }
     .sub-heading { font-weight: 500; margin: 20px 0 8px; }
     label {
-      display: inline-flex;
-      align-items: flex-start;
+      display: inline-flex !important;
+      align-items: flex-start !important;
       gap: 4px;
       margin-bottom: 10px;
       margin-right: 16px;
       font-weight: 500;
-      line-height: 1.4;
+      line-height: 1.4 !important;
     }
     label input[type="checkbox"], label input[type="radio"] {
-      margin-top: 0.2em;
-      flex-shrink: 0;
+      margin-top: 0.2em !important;
+      flex-shrink: 0 !important;
+      vertical-align: top;
     }
     input[type="text"], input[type="email"], textarea {
       width: 100%;
