@@ -1559,6 +1559,19 @@ textarea.fi { resize: vertical; min-height: 60px; }
             </select>
           </div>
         </div>
+        <div class="field-group">
+          <div class="field-group-title">Form width (desktop)</div>
+          <div class="field">
+            <label>Width</label>
+            <select class="fi" id="formWidth" onchange="regen()">
+              <option value="480px">Narrow — 480px</option>
+              <option value="700px" selected>Medium — 700px</option>
+              <option value="900px">Wide — 900px</option>
+              <option value="1100px">Extra wide — 1100px</option>
+            </select>
+            <div class="hint">Controls the maximum width of the form on desktop screens. On mobile the form always fills the available width.</div>
+          </div>
+        </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-group-title">Demographic questions</div>
           <div class="field">
@@ -2008,6 +2021,7 @@ function generateCode() {
   const zapierUrl = gv('zapierUrl') || 'https://hooks.zapier.com/hooks/catch/YOUR_HOOK/';
   const primaryColor = gv('primaryColor') || '#4da16e';
   const btnRadius = gv('btnRadius') || '20px';
+  const formWidth = gv('formWidth') || '700px';
   const fontName = gv('fontName');
   const openingPara = fieldToggles.openingEnabled ? (gv('openingPara') || 'I am writing to express my support for the above planning application.') : '';
   const stmtIntro = fieldToggles.stmtIntroEnabled ? (gv('stmtIntro') || 'I believe this development will benefit our community in the following ways:') : '';
@@ -2082,7 +2096,7 @@ ${checkboxHTML}
       background: #F5F5F5;
       padding: 20px;
       border-radius: 12px;
-      max-width: 700px;
+      max-width: ${formWidth};
       margin: 20px auto;
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
@@ -2090,11 +2104,15 @@ ${checkboxHTML}
     .sub-heading { font-weight: 500; margin: 20px 0 8px; }
     label {
       display: inline-flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 4px;
       margin-bottom: 10px;
       margin-right: 16px;
       font-weight: 500;
+    }
+    label input[type="checkbox"], label input[type="radio"] {
+      margin-top: 3px;
+      flex-shrink: 0;
     }
     input[type="text"], input[type="email"], textarea {
       width: 100%;
@@ -2672,6 +2690,7 @@ function collectCurrentConfig() {
     primaryColor: gv('primaryColor') || '#4da16e',
     fontName: gv('fontName'),
     btnRadius: gv('btnRadius') || '8px',
+    formWidth: gv('formWidth') || '700px',
     demoLayout: demoLayout,
     statementsEnabled: statementsEnabled,
     statements: JSON.parse(JSON.stringify(statements)),
@@ -2701,6 +2720,7 @@ function applyConfig(cfg) {
   document.getElementById('primaryColorPicker').value = cfg.primaryColor || '#4da16e';
   document.getElementById('fontName').value = cfg.fontName || '';
   document.getElementById('btnRadius').value = cfg.btnRadius || '8px';
+  document.getElementById('formWidth').value = cfg.formWidth || '700px';
 
   demoLayout = cfg.demoLayout || 'vertical';
   document.getElementById('layoutOptVertical').classList.toggle('active', demoLayout === 'vertical');
