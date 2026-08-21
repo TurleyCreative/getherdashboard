@@ -2086,13 +2086,15 @@ ${checkboxHTML}
   <meta charset="UTF-8">
   <title>${escHtml(siteDesc) || 'Support Form'}</title>${fontLinkTag}
   <style>
-    * { box-sizing: border-box; }
-    body {
-      background: #ffffff;
-      margin: 0;
-      padding: 0;${fontFamilyRule}
+    .gether-support-form,
+    .gether-support-form *,
+    .gether-support-form *::before,
+    .gether-support-form *::after {
+      box-sizing: border-box;
     }
-    .section-box {
+    .gether-support-form {${fontFamilyRule}
+    }
+    .gether-support-form .section-box {
       background: #F5F5F5;
       padding: 20px;
       border-radius: 12px;
@@ -2100,9 +2102,9 @@ ${checkboxHTML}
       margin: 20px auto;
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
-    h4 { margin-top: 20px; margin-bottom: 8px; }
-    .sub-heading { font-weight: 500; margin: 20px 0 8px; }
-    label {
+    .gether-support-form h4 { margin-top: 20px; margin-bottom: 8px; }
+    .gether-support-form .sub-heading { font-weight: 500; margin: 20px 0 8px; }
+    .gether-support-form label {
       display: inline-flex !important;
       align-items: flex-start !important;
       gap: 4px;
@@ -2111,12 +2113,12 @@ ${checkboxHTML}
       font-weight: 500;
       line-height: 1.4 !important;
     }
-    label input[type="checkbox"], label input[type="radio"] {
+    .gether-support-form label input[type="checkbox"], .gether-support-form label input[type="radio"] {
       margin-top: 0.2em !important;
       flex-shrink: 0 !important;
       vertical-align: top;
     }
-    input[type="text"], input[type="email"], textarea {
+    .gether-support-form input[type="text"], .gether-support-form input[type="email"], .gether-support-form textarea {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
@@ -2126,8 +2128,8 @@ ${checkboxHTML}
       font-size: 14px;
       font-family: inherit;
     }
-    input[type="text"], input[type="email"] { margin-bottom: 12px; }
-    .field-error {
+    .gether-support-form input[type="text"], .gether-support-form input[type="email"] { margin-bottom: 12px; }
+    .gether-support-form .field-error {
       display: none;
       color: #c0392b;
       font-size: 12px;
@@ -2138,14 +2140,14 @@ ${checkboxHTML}
       border-left: 3px solid #c0392b;
       border-radius: 4px;
     }
-    .field-error.visible { display: block; }
-    input.invalid {
+    .gether-support-form .field-error.visible { display: block; }
+    .gether-support-form input.invalid {
       border-color: #c0392b !important;
       background: #fff8f7 !important;
     }
-    input[type="checkbox"] { margin-right: 8px; }
-    .req-marker { font-size: 11px; font-weight: 400; color: #888; margin-left: 4px; }
-    button {
+    .gether-support-form input[type="checkbox"] { margin-right: 8px; }
+    .gether-support-form .req-marker { font-size: 11px; font-weight: 400; color: #888; margin-left: 4px; }
+    .gether-support-form button {
       padding: 14px 24px;
       margin-bottom: 20px;
       background: ${primaryColor};
@@ -2156,8 +2158,8 @@ ${checkboxHTML}
       font-size: 16px;
       font-family: inherit;
     }
-    button:hover { opacity: 0.88; }
-    #letter-preview {
+    .gether-support-form button:hover { opacity: 0.88; }
+    .gether-support-form #letter-preview {
       min-height: 380px;
       border: 1px solid #ccc;
       padding: 16px;
@@ -2165,13 +2167,14 @@ ${checkboxHTML}
       background: #fff;
       margin-bottom: 24px;
     }
-    #preview-section, #thank-you-section { display: none; }
-    ul { margin-left: 20px; }
-    #additionalcomments { height: 180px; }
+    .gether-support-form #preview-section, .gether-support-form #thank-you-section { display: none; }
+    .gether-support-form ul { margin-left: 20px; }
+    .gether-support-form #additionalcomments { height: 180px; }
   </style>
 </head>
 <body>
 
+<div class="gether-support-form">
 <div id="letter-form-container" class="section-box">
   <h4>${escHtml(appRef)}</h4>
   <div class="sub-heading">About you (required)</div>
@@ -2224,6 +2227,7 @@ ${previewEnabled ? `<div id="preview-section" class="section-box">
   <h4>Thank you for your support!</h4>
   <p>Your letter of support has been successfully submitted.</p>
   <p>A copy will be sent to the email address you provided.</p>
+</div>
 </div>
 
 <script>
