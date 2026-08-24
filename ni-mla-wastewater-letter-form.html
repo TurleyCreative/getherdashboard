@@ -1,0 +1,652 @@
+<!--
+  Gether NI MLA Campaign Form — Wastewater Crisis
+  Single-file, no-build HTML form for embedding in a Squarespace code block.
+  Looks up a user's 5 local MLAs (plus the Minister for Infrastructure) via
+  postcode -> NI Assembly constituency, then submits a letter to a Zapier
+  webhook which fans it out by email.
+-->
+<div id="gether-ni-mla-form-root">
+<style>
+  #gether-ni-mla-form-root {
+    all: initial;
+  }
+  #gether-ni-mla-form-root, #gether-ni-mla-form-root * {
+    box-sizing: border-box;
+  }
+  #gether-ni-mla-form-root {
+    display: block;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #222;
+  }
+  #gether-ni-mla-form-root .gnf-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #f5f5f4;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 32px;
+  }
+  #gether-ni-mla-form-root h2 {
+    margin: 0 0 8px;
+    font-size: 1.5em;
+    font-weight: 700;
+  }
+  #gether-ni-mla-form-root p {
+    margin: 0 0 16px;
+  }
+  #gether-ni-mla-form-root label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  #gether-ni-mla-form-root .gnf-required {
+    font-weight: 400;
+    color: #767676;
+    font-size: 0.85em;
+  }
+  #gether-ni-mla-form-root .gnf-field {
+    margin-bottom: 16px;
+  }
+  #gether-ni-mla-form-root input[type="text"],
+  #gether-ni-mla-form-root input[type="email"],
+  #gether-ni-mla-form-root textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: inherit;
+    background: #fff;
+    color: #222;
+  }
+  #gether-ni-mla-form-root textarea {
+    resize: vertical;
+    min-height: 90px;
+  }
+  #gether-ni-mla-form-root .gnf-btn {
+    display: inline-block;
+    background: var(--gnf-primary, #4da16e);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 22px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #gether-ni-mla-form-root .gnf-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  #gether-ni-mla-form-root .gnf-btn-secondary {
+    background: transparent;
+    color: #444;
+    border: 1px solid #ccc;
+  }
+  #gether-ni-mla-form-root .gnf-postcode-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  #gether-ni-mla-form-root .gnf-postcode-row input {
+    flex: 1;
+    min-width: 160px;
+  }
+  #gether-ni-mla-form-root .gnf-error {
+    color: #a3271e;
+    background: #fdecea;
+    border: 1px solid #f3c6c2;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    font-size: 0.95em;
+  }
+  #gether-ni-mla-form-root .gnf-success {
+    color: #1f5e3a;
+    background: #e6f4ea;
+    border: 1px solid #b9dcc4;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  #gether-ni-mla-form-root .gnf-mla-panel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+  }
+  #gether-ni-mla-form-root .gnf-mla-panel h3 {
+    margin: 0 0 10px;
+    font-size: 1.05em;
+  }
+  #gether-ni-mla-form-root .gnf-mla-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  #gether-ni-mla-form-root .gnf-mla-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  #gether-ni-mla-form-root .gnf-mla-list li:last-child {
+    border-bottom: none;
+  }
+  #gether-ni-mla-form-root .gnf-mla-name {
+    font-weight: 600;
+  }
+  #gether-ni-mla-form-root .gnf-mla-party {
+    color: #666;
+    font-size: 0.9em;
+  }
+  #gether-ni-mla-form-root .gnf-minister-note {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #ddd;
+    font-size: 0.9em;
+    color: #555;
+  }
+  #gether-ni-mla-form-root .gnf-hidden {
+    display: none !important;
+  }
+  #gether-ni-mla-form-root .gnf-letter-box {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    white-space: pre-wrap;
+    font-size: 0.95em;
+    margin-bottom: 16px;
+  }
+  #gether-ni-mla-form-root .gnf-checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  #gether-ni-mla-form-root .gnf-checkbox-row input[type="checkbox"] {
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  #gether-ni-mla-form-root .gnf-checkbox-row label {
+    font-weight: 400;
+    margin-bottom: 0;
+  }
+  #gether-ni-mla-form-root .gnf-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.5);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: gnf-spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes gnf-spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
+<div class="gnf-wrap">
+  <h2>Write to your MLAs about the wastewater crisis</h2>
+  <p>Enter your Northern Ireland postcode to find your local MLAs and the Minister for Infrastructure, then send them a letter urging action on the wastewater crisis.</p>
+
+  <!-- STEP 1: Postcode lookup -->
+  <div id="gnf-step-postcode">
+    <div class="gnf-field">
+      <label for="gnf-postcode-input">Your postcode <span class="gnf-required">(required)</span></label>
+      <div class="gnf-postcode-row">
+        <input type="text" id="gnf-postcode-input" placeholder="e.g. BT1 1AA" autocomplete="postal-code">
+        <button type="button" class="gnf-btn" id="gnf-lookup-btn">Find my MLAs</button>
+      </div>
+      <div id="gnf-postcode-error" class="gnf-error gnf-hidden"></div>
+    </div>
+  </div>
+
+  <!-- MLA results panel -->
+  <div id="gnf-mla-panel" class="gnf-mla-panel gnf-hidden">
+    <h3 id="gnf-constituency-title"></h3>
+    <ul class="gnf-mla-list" id="gnf-mla-list"></ul>
+    <div class="gnf-minister-note">Your letter will also be sent to John O'Dowd MLA, Minister for Infrastructure.</div>
+  </div>
+
+  <!-- STEP 2: Personal details + letter -->
+  <form id="gnf-main-form" class="gnf-hidden">
+    <div class="gnf-field">
+      <label for="gnf-name">Full name <span class="gnf-required">(required)</span></label>
+      <input type="text" id="gnf-name" name="name" required>
+    </div>
+    <div class="gnf-field">
+      <label for="gnf-email">Email address <span class="gnf-required">(required)</span></label>
+      <input type="email" id="gnf-email" name="email" required>
+    </div>
+    <div class="gnf-field">
+      <label for="gnf-address1">Address line 1 <span class="gnf-required">(required)</span></label>
+      <input type="text" id="gnf-address1" name="address1" required>
+    </div>
+    <div class="gnf-field">
+      <label for="gnf-address2">Address line 2</label>
+      <input type="text" id="gnf-address2" name="address2">
+    </div>
+    <div class="gnf-field">
+      <label for="gnf-citytown">City / town <span class="gnf-required">(required)</span></label>
+      <input type="text" id="gnf-citytown" name="citytown" required>
+    </div>
+    <div class="gnf-field">
+      <label for="gnf-comments">Additional comments (optional)</label>
+      <textarea id="gnf-comments" name="additionalcomments" placeholder="Add anything personal you'd like included in your letter"></textarea>
+    </div>
+
+    <div class="gnf-field">
+      <label>Your letter</label>
+      <div class="gnf-letter-box" id="gnf-letter-preview"></div>
+    </div>
+
+    <div class="gnf-checkbox-row">
+      <input type="checkbox" id="gnf-consent-send" required>
+      <label for="gnf-consent-send">I confirm the details above are accurate and I consent to this letter being sent, on my behalf, to my local MLAs and the Minister for Infrastructure. <span class="gnf-required">(required)</span></label>
+    </div>
+    <div class="gnf-checkbox-row">
+      <input type="checkbox" id="gnf-consent-contact" required>
+      <label for="gnf-consent-contact">I consent to Gether NI storing my details in order to send this letter and a confirmation copy to me. <span class="gnf-required">(required)</span></label>
+    </div>
+
+    <div id="gnf-submit-error" class="gnf-error gnf-hidden"></div>
+
+    <button type="submit" class="gnf-btn" id="gnf-submit-btn">Send my letter</button>
+  </form>
+
+  <!-- Success state -->
+  <div id="gnf-success" class="gnf-success gnf-hidden">
+    <strong>Thank you.</strong> Your letter has been sent to your MLAs and the Minister for Infrastructure. A confirmation copy has been sent to your email address.
+  </div>
+</div>
+</div>
+
+<script>
+(function () {
+  // ---- Configuration -------------------------------------------------
+  var ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/REPLACE_ME/REPLACE_ME/"; // TODO: set live Zapier webhook URL
+  var MAPIT_BASE = "https://mapit.mysociety.org/postcode/";
+  var MINISTER_EMAIL = "john.odowd@mla.niassembly.gov.uk";
+  var MINISTER_NAME = "John O'Dowd MLA, Minister for Infrastructure";
+
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  // ---- MLA dataset -----------------------------------------------------
+  var mlaData = {
+    "East Antrim": [
+      { name: "Ms Cheryl Brownlee", party: "Democratic Unionist Party", email: "cheryl.brownlee@mla.niassembly.gov.uk" },
+      { name: "Mr Stewart Dickson", party: "Alliance Party", email: "stewart.dickson@mla.niassembly.gov.uk" },
+      { name: "Mr Danny Donnelly", party: "Alliance Party", email: "danny.donnelly@mla.niassembly.gov.uk" },
+      { name: "Mr Gordon Lyons", party: "Democratic Unionist Party", email: "gordon.lyons@mla.niassembly.gov.uk" },
+      { name: "Mr John Stewart", party: "Ulster Unionist Party", email: "john.stewart@mla.niassembly.gov.uk" }
+    ],
+    "East Belfast": [
+      { name: "Mr Andy Allen MBE", party: "Ulster Unionist Party", email: "andy.allen@mla.niassembly.gov.uk" },
+      { name: "Mr David Brooks", party: "Democratic Unionist Party", email: "david.brooks@mla.niassembly.gov.uk" },
+      { name: "Ms Joanne Bunting", party: "Democratic Unionist Party", email: "joanne.bunting@mla.niassembly.gov.uk" },
+      { name: "Mrs Naomi Long", party: "Alliance Party", email: "naomi.long@mla.niassembly.gov.uk" },
+      { name: "Mr Peter McReynolds", party: "Alliance Party", email: "peter.mcreynolds@mla.niassembly.gov.uk" }
+    ],
+    "East Londonderry": [
+      { name: "Dr Caoimhe Archibald", party: "Sinn Féin", email: "caoimhe.archibald@mla.niassembly.gov.uk" },
+      { name: "Mr Maurice Bradley", party: "Democratic Unionist Party", email: "maurice.bradley@mla.niassembly.gov.uk" },
+      { name: "Ms Cara Hunter", party: "Social Democratic and Labour Party", email: "cara.hunter@mla.niassembly.gov.uk" },
+      { name: "Mr Alan Robinson", party: "Democratic Unionist Party", email: "alan.robinson@mla.niassembly.gov.uk" },
+      { name: "Ms Claire Sugden", party: "Independent", email: "claire.sugden@mla.niassembly.gov.uk" }
+    ],
+    "Fermanagh and South Tyrone": [
+      { name: "Ms Diana Armstrong", party: "Ulster Unionist Party", email: "diana.armstrong@mla.niassembly.gov.uk" },
+      { name: "Miss Jemma Dolan", party: "Sinn Féin", email: "jemma.dolan@mla.niassembly.gov.uk" },
+      { name: "Mrs Deborah Erskine", party: "Democratic Unionist Party", email: "deborah.erskine@mla.niassembly.gov.uk" },
+      { name: "Mr Colm Gildernew", party: "Sinn Féin", email: "colm.gildernew@mla.niassembly.gov.uk" },
+      { name: "Miss Áine Murphy", party: "Sinn Féin", email: "aine.murphy@mla.niassembly.gov.uk" }
+    ],
+    "Foyle": [
+      { name: "Mr Pádraig Delargy", party: "Sinn Féin", email: "padraig.delargy@mla.niassembly.gov.uk" },
+      { name: "Mr Mark Durkan", party: "Social Democratic and Labour Party", email: "markh.durkan@mla.niassembly.gov.uk" },
+      { name: "Mrs Ciara Ferguson", party: "Sinn Féin", email: "ciara.ferguson@mla.niassembly.gov.uk" },
+      { name: "Ms Sinéad McLaughlin", party: "Social Democratic and Labour Party", email: "sinead.mclaughlin@mla.niassembly.gov.uk" },
+      { name: "Mrs Julie Middleton", party: "Democratic Unionist Party", email: "julie.middleton@mla.niassembly.gov.uk" }
+    ],
+    "Lagan Valley": [
+      { name: "Mr Robbie Butler", party: "Ulster Unionist Party", email: "robbie.butler@mla.niassembly.gov.uk" },
+      { name: "Mr Paul Givan", party: "Democratic Unionist Party", email: "paul.givan@mla.niassembly.gov.uk" },
+      { name: "Mrs Michelle Guy", party: "Alliance Party", email: "michelle.guy@mla.niassembly.gov.uk" },
+      { name: "Mr David Honeyford", party: "Alliance Party", email: "david.honeyford@mla.niassembly.gov.uk" },
+      { name: "Mrs Emma Little-Pengelly", party: "Democratic Unionist Party", email: "emma.little-pengelly@mla.niassembly.gov.uk" }
+    ],
+    "Mid Ulster": [
+      { name: "Mr Keith Buchanan", party: "Democratic Unionist Party", email: "keith.buchanan@mla.niassembly.gov.uk" },
+      { name: "Mrs Linda Dillon", party: "Sinn Féin", email: "linda.dillon@mla.niassembly.gov.uk" },
+      { name: "Mr Patsy McGlone", party: "Social Democratic and Labour Party", email: "patsy.mcglone@mla.niassembly.gov.uk" },
+      { name: "Ms Michelle O'Neill", party: "Sinn Féin", email: "michelle.oneill@mla.niassembly.gov.uk" },
+      { name: "Ms Emma Sheerin", party: "Sinn Féin", email: "emma.sheerin@mla.niassembly.gov.uk" }
+    ],
+    "Newry and Armagh": [
+      { name: "Mr Cathal Boylan", party: "Sinn Féin", email: "cathal.boylan@mla.niassembly.gov.uk" },
+      { name: "Ms Aoife Finnegan", party: "Sinn Féin", email: "Aoife.Finnegan@mla.niassembly.gov.uk" },
+      { name: "Ms Liz Kimmins", party: "Sinn Féin", email: "liz.kimmins@mla.niassembly.gov.uk" },
+      { name: "Mr Justin McNulty", party: "Social Democratic and Labour Party", email: "justin.mcnulty@mla.niassembly.gov.uk" },
+      { name: "Mr Gareth Wilson", party: "Democratic Unionist Party", email: "Gareth.Wilson@mla.niassembly.gov.uk" }
+    ],
+    "North Antrim": [
+      { name: "Mr Jon Burrows", party: "Ulster Unionist Party", email: "jon.burrows@mla.niassembly.gov.uk" },
+      { name: "Mr Paul Frew", party: "Democratic Unionist Party", email: "paul.frew@mla.niassembly.gov.uk" },
+      { name: "Mr Timothy Gaston", party: "Traditional Unionist Voice", email: "Timothy.Gaston@mla.niassembly.gov.uk" },
+      { name: "Mr Philip McGuigan", party: "Sinn Féin", email: "philip.mcguigan@mla.niassembly.gov.uk" },
+      { name: "Ms Sian Mulholland", party: "Alliance Party", email: "sian.mulholland@mla.niassembly.gov.uk" }
+    ],
+    "North Belfast": [
+      { name: "Mr Phillip Brett", party: "Democratic Unionist Party", email: "phillip.brett@mla.niassembly.gov.uk" },
+      { name: "Mr Gerry Kelly", party: "Sinn Féin", email: "gerry.kelly@mla.niassembly.gov.uk" },
+      { name: "Mr Brian Kingston", party: "Democratic Unionist Party", email: "brian.kingston@mla.niassembly.gov.uk" },
+      { name: "Miss Nuala McAllister", party: "Alliance Party", email: "nuala.mcallister@mla.niassembly.gov.uk" },
+      { name: "Ms Carál Ní Chuilín", party: "Sinn Féin", email: "caral.nichuilin@mla.niassembly.gov.uk" }
+    ],
+    "North Down": [
+      { name: "Mr Alan Chambers", party: "Ulster Unionist Party", email: "alan.chambers@mla.niassembly.gov.uk" },
+      { name: "Mr Stephen Dunne", party: "Democratic Unionist Party", email: "Stephen.Dunne@mla.niassembly.gov.uk" },
+      { name: "Ms Connie Egan", party: "Alliance Party", email: "connie.egan@mla.niassembly.gov.uk" },
+      { name: "Mr Peter Martin", party: "Democratic Unionist Party", email: "peter.martin@mla.niassembly.gov.uk" },
+      { name: "Mr Andrew Muir", party: "Alliance Party", email: "andrew.muir@mla.niassembly.gov.uk" }
+    ],
+    "South Antrim": [
+      { name: "Dr Steve Aiken OBE", party: "Ulster Unionist Party", email: "steve.aiken@mla.niassembly.gov.uk" },
+      { name: "Mr John Blair", party: "Alliance Party", email: "john.blair@mla.niassembly.gov.uk" },
+      { name: "Mrs Pam Cameron", party: "Democratic Unionist Party", email: "Pam.Cameron@mla.niassembly.gov.uk" },
+      { name: "Mr Trevor Clarke", party: "Democratic Unionist Party", email: "trevor.clarke@mla.niassembly.gov.uk" },
+      { name: "Mr Declan Kearney", party: "Sinn Féin", email: "declan.kearney@mla.niassembly.gov.uk" }
+    ],
+    "South Belfast": [
+      { name: "Ms Paula Bradshaw", party: "Alliance Party", email: "paula.bradshaw@mla.niassembly.gov.uk" },
+      { name: "Miss Deirdre Hargey", party: "Sinn Féin", email: "deirdre.hargey@mla.niassembly.gov.uk" },
+      { name: "Ms Kate Nicholl", party: "Alliance Party", email: "kate.nicholl@mla.niassembly.gov.uk" },
+      { name: "Mr Matthew O'Toole", party: "Social Democratic and Labour Party", email: "matthew.otoole@mla.niassembly.gov.uk" },
+      { name: "Mr Edwin Poots", party: "Democratic Unionist Party", email: "edwin.poots@mla.niassembly.gov.uk" }
+    ],
+    "South Down": [
+      { name: "Mrs Sinéad Ennis", party: "Sinn Féin", email: "sinead.ennis@mla.niassembly.gov.uk" },
+      { name: "Ms Diane Forsythe", party: "Democratic Unionist Party", email: "diane.forsythe@mla.niassembly.gov.uk" },
+      { name: "Mr Colin McGrath", party: "Social Democratic and Labour Party", email: "colin.mcgrath@mla.niassembly.gov.uk" },
+      { name: "Mr Andrew McMurray", party: "Alliance Party", email: "andrew.mcmurray@mla.niassembly.gov.uk" },
+      { name: "Mrs Cathy Mason", party: "Sinn Féin", email: "cathy.mason@mla.niassembly.gov.uk" }
+    ],
+    "Strangford": [
+      { name: "Ms Kellie Armstrong", party: "Alliance Party", email: "kellie.armstrong@mla.niassembly.gov.uk" },
+      { name: "Mr Harry Harvey", party: "Democratic Unionist Party", email: "harry.harvey@mla.niassembly.gov.uk" },
+      { name: "Miss Michelle McIlveen", party: "Democratic Unionist Party", email: "michelle.mcilveen@mla.niassembly.gov.uk" },
+      { name: "Mr Nick Mathison", party: "Alliance Party", email: "nick.mathison@mla.niassembly.gov.uk" },
+      { name: "Mr Mike Nesbitt", party: "Ulster Unionist Party", email: "mike.nesbitt@mla.niassembly.gov.uk" }
+    ],
+    "Upper Bann": [
+      { name: "Mr Doug Beattie MC", party: "Independent", email: "doug.beattie@mla.niassembly.gov.uk" },
+      { name: "Mr Jonathan Buckley", party: "Democratic Unionist Party", email: "jonathan.buckley@mla.niassembly.gov.uk" },
+      { name: "Mrs Diane Dodds", party: "Democratic Unionist Party", email: "diane.dodds@mla.niassembly.gov.uk" },
+      { name: "Mr John O'Dowd", party: "Sinn Féin", email: "john.odowd@mla.niassembly.gov.uk" },
+      { name: "Mr Eóin Tennyson", party: "Alliance Party", email: "eoin.tennyson@mla.niassembly.gov.uk" }
+    ],
+    "West Belfast": [
+      { name: "Mr Danny Baker", party: "Sinn Féin", email: "danny.baker@mla.niassembly.gov.uk" },
+      { name: "Mr Gerry Carroll", party: "People Before Profit Alliance", email: "gerry.carroll@mla.niassembly.gov.uk" },
+      { name: "Miss Órlaithí Flynn", party: "Sinn Féin", email: "orlaithi.flynn@mla.niassembly.gov.uk" },
+      { name: "Ms Aisling Reilly", party: "Sinn Féin", email: "aisling.reilly@mla.niassembly.gov.uk" },
+      { name: "Mr Pat Sheehan", party: "Sinn Féin", email: "pat.sheehan@mla.niassembly.gov.uk" }
+    ],
+    "West Tyrone": [
+      { name: "Miss Nicola Brogan", party: "Sinn Féin", email: "nicola.brogan@mla.niassembly.gov.uk" },
+      { name: "Mr Tom Buchanan", party: "Democratic Unionist Party", email: "thomas.buchanan@mla.niassembly.gov.uk" },
+      { name: "Mr Declan McAleer", party: "Sinn Féin", email: "declan.mcaleer@mla.niassembly.gov.uk" },
+      { name: "Mr Daniel McCrossan", party: "Social Democratic and Labour Party", email: "daniel.mccrossan@mla.niassembly.gov.uk" },
+      { name: "Mr Maolíosa McHugh", party: "Sinn Féin", email: "Maoliosa.McHugh@mla.niassembly.gov.uk" }
+    ]
+  };
+
+  // ---- DOM refs --------------------------------------------------------
+  var root = document.getElementById("gether-ni-mla-form-root");
+  var postcodeInput = root.querySelector("#gnf-postcode-input");
+  var lookupBtn = root.querySelector("#gnf-lookup-btn");
+  var postcodeError = root.querySelector("#gnf-postcode-error");
+  var mlaPanel = root.querySelector("#gnf-mla-panel");
+  var constituencyTitle = root.querySelector("#gnf-constituency-title");
+  var mlaListEl = root.querySelector("#gnf-mla-list");
+  var mainForm = root.querySelector("#gnf-main-form");
+  var letterPreview = root.querySelector("#gnf-letter-preview");
+  var submitBtn = root.querySelector("#gnf-submit-btn");
+  var submitError = root.querySelector("#gnf-submit-error");
+  var successEl = root.querySelector("#gnf-success");
+
+  var currentConstituency = null;
+  var currentMlas = [];
+
+  function showError(el, msg) {
+    el.textContent = msg;
+    el.classList.remove("gnf-hidden");
+  }
+  function hideError(el) {
+    el.classList.add("gnf-hidden");
+    el.textContent = "";
+  }
+
+  function buildLetterText() {
+    var name = root.querySelector("#gnf-name").value.trim();
+    var comments = root.querySelector("#gnf-comments").value.trim();
+    var lines = [];
+    lines.push("Dear elected representative,");
+    lines.push("");
+    lines.push("I am writing to express my deep concern about the ongoing wastewater crisis in Northern Ireland and the lack of meaningful political action to address it.");
+    if (comments) {
+      lines.push("");
+      lines.push(comments);
+    }
+    lines.push("");
+    lines.push("I urge you to take urgent action to resolve this crisis and ensure that adequate investment in wastewater infrastructure is made a priority.");
+    lines.push("");
+    lines.push("Kind regards,");
+    lines.push(name || "[Name]");
+    return lines.join("\n");
+  }
+
+  function refreshLetterPreview() {
+    letterPreview.textContent = buildLetterText();
+  }
+
+  mainForm.addEventListener("input", refreshLetterPreview);
+
+  function renderMlaPanel(constituency, mlas) {
+    constituencyTitle.textContent = "Your MLAs — " + constituency;
+    mlaListEl.innerHTML = "";
+    mlas.forEach(function (mla) {
+      var li = document.createElement("li");
+      var nameSpan = document.createElement("div");
+      nameSpan.className = "gnf-mla-name";
+      nameSpan.textContent = mla.name;
+      var partySpan = document.createElement("div");
+      partySpan.className = "gnf-mla-party";
+      partySpan.textContent = mla.party;
+      li.appendChild(nameSpan);
+      li.appendChild(partySpan);
+      mlaListEl.appendChild(li);
+    });
+    mlaPanel.classList.remove("gnf-hidden");
+    mainForm.classList.remove("gnf-hidden");
+    refreshLetterPreview();
+  }
+
+  function extractConstituency(mapitData) {
+    var areas = mapitData && mapitData.areas;
+    if (!areas) return null;
+    for (var key in areas) {
+      if (!areas.hasOwnProperty(key)) continue;
+      var area = areas[key];
+      if (area && area.type === "NIE") {
+        return area.name;
+      }
+    }
+    return null;
+  }
+
+  function doLookup() {
+    var raw = postcodeInput.value.trim();
+    hideError(postcodeError);
+    mlaPanel.classList.add("gnf-hidden");
+    mainForm.classList.add("gnf-hidden");
+    successEl.classList.add("gnf-hidden");
+
+    if (!raw) {
+      showError(postcodeError, "Please enter your postcode.");
+      return;
+    }
+
+    var normalised = raw.toUpperCase().replace(/\s+/g, "");
+    if (normalised.indexOf("BT") !== 0) {
+      showError(postcodeError, "This form is for Northern Ireland residents only. Please enter a valid BT postcode.");
+      return;
+    }
+
+    lookupBtn.disabled = true;
+    lookupBtn.innerHTML = '<span class="gnf-spinner"></span>Looking up…';
+
+    var url = MAPIT_BASE + encodeURIComponent(raw.trim());
+    var controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
+    var timeoutId = setTimeout(function () {
+      if (controller) controller.abort();
+    }, 10000);
+
+    fetch(url, { signal: controller ? controller.signal : undefined })
+      .then(function (resp) {
+        clearTimeout(timeoutId);
+        if (resp.status === 404) {
+          throw { kind: "notfound" };
+        }
+        if (!resp.ok) {
+          throw { kind: "api" };
+        }
+        return resp.json();
+      })
+      .then(function (data) {
+        if (data && data.code === 404) {
+          throw { kind: "notfound" };
+        }
+        var constituency = extractConstituency(data);
+        if (!constituency || !mlaData.hasOwnProperty(constituency)) {
+          throw { kind: "noconstituency" };
+        }
+        currentConstituency = constituency;
+        currentMlas = mlaData[constituency];
+        renderMlaPanel(constituency, currentMlas);
+      })
+      .catch(function (err) {
+        if (err && err.kind === "notfound") {
+          showError(postcodeError, "We couldn't find that postcode. Please check it and try again.");
+        } else if (err && err.kind === "noconstituency") {
+          showError(postcodeError, "This form is for Northern Ireland residents only. Please enter a valid BT postcode.");
+        } else {
+          showError(postcodeError, "Sorry, something went wrong looking up your postcode. Please check your connection and try again.");
+        }
+      })
+      .finally(function () {
+        lookupBtn.disabled = false;
+        lookupBtn.textContent = "Find my MLAs";
+      });
+  }
+
+  lookupBtn.addEventListener("click", doLookup);
+  postcodeInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      doLookup();
+    }
+  });
+
+  function buildRecipientLists() {
+    var emails = currentMlas.map(function (m) { return m.email; });
+    var names = currentMlas.map(function (m) { return m.name; });
+    if (emails.indexOf(MINISTER_EMAIL) === -1) {
+      emails.push(MINISTER_EMAIL);
+      names.push(MINISTER_NAME);
+    }
+    return { emails: emails, names: names };
+  }
+
+  mainForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    hideError(submitError);
+
+    if (!currentConstituency || !currentMlas.length) {
+      showError(submitError, "Please look up your postcode first.");
+      return;
+    }
+
+    var name = root.querySelector("#gnf-name").value.trim();
+    var email = root.querySelector("#gnf-email").value.trim();
+    var address1 = root.querySelector("#gnf-address1").value.trim();
+    var address2 = root.querySelector("#gnf-address2").value.trim();
+    var citytown = root.querySelector("#gnf-citytown").value.trim();
+    var comments = root.querySelector("#gnf-comments").value.trim();
+    var postcode = postcodeInput.value.trim();
+    var consentSend = root.querySelector("#gnf-consent-send").checked;
+    var consentContact = root.querySelector("#gnf-consent-contact").checked;
+
+    if (!name || !email || !address1 || !citytown) {
+      showError(submitError, "Please fill in all required fields.");
+      return;
+    }
+    if (!EMAIL_RE.test(email)) {
+      showError(submitError, "Please enter a valid email address.");
+      return;
+    }
+    if (!consentSend || !consentContact) {
+      showError(submitError, "Please tick both consent checkboxes to continue.");
+      return;
+    }
+
+    var recipients = buildRecipientLists();
+    var letter = buildLetterText();
+
+    var payload = {
+      name: name,
+      email: email,
+      address1: address1,
+      address2: address2,
+      citytown: citytown,
+      postcode: postcode,
+      additionalcomments: comments,
+      constituency: currentConstituency,
+      mla_emails: recipients.emails.join(","),
+      mla_names: recipients.names.join(", "),
+      letter: letter
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="gnf-spinner"></span>Sending…';
+
+    var body = Object.keys(payload)
+      .map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(payload[k]); })
+      .join("&");
+
+    fetch(ZAPIER_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body
+    })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("Webhook error");
+        mainForm.classList.add("gnf-hidden");
+        mlaPanel.classList.add("gnf-hidden");
+        root.querySelector("#gnf-step-postcode").classList.add("gnf-hidden");
+        successEl.classList.remove("gnf-hidden");
+      })
+      .catch(function () {
+        showError(submitError, "Sorry, something went wrong sending your letter. Please try again.");
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Send my letter";
+      });
+  });
+})();
+</script>
