@@ -2159,13 +2159,16 @@ ${checkboxHTML}
       font-family: inherit;
     }
     .gether-support-form button:hover { opacity: 0.88; }
-    .gether-support-form #letter-preview {
+    .gether-support-form #letter-preview-wrap {
       min-height: 380px;
       border: 1px solid #ccc;
       padding: 16px;
       border-radius: 8px;
       background: #fff;
       margin-bottom: 24px;
+    }
+    .gether-support-form #letter-signoff {
+      margin-top: 8px;
     }
     .gether-support-form #preview-section, .gether-support-form #thank-you-section { display: none; }
     .gether-support-form ul { margin-left: 20px; }
@@ -2214,9 +2217,12 @@ ${consentHTML}
 
 ${previewEnabled ? `<div id="preview-section" class="section-box">
   <h4>Preview and Edit Your Letter</h4>
-  <p>Feel free to edit and personalise your letter as you wish.</p>
+  <p>Feel free to edit and personalise your letter as you wish. No need to sign off with "Kind regards" and your name or details — we'll add that for you.</p>
   <form id="final-form" onsubmit="finaliseSubmission(event)">
-    <div id="letter-preview" contenteditable="true"></div>
+    <div id="letter-preview-wrap">
+      <div id="letter-preview" contenteditable="true"></div>
+      <div id="letter-signoff" contenteditable="false"></div>
+    </div>
     <input type="hidden" id="hidden-name" name="name">
     <input type="hidden" id="hidden-email" name="email">
     <button type="submit">${escHtml(submitBtnText)}</button>
@@ -2262,7 +2268,7 @@ function clearEmailError(input) {
   }
 }
 
-function buildLetterHTML(name, reasons, additional) {
+function buildLetterBodyHTML(reasons, additional) {
   let html = '';
   const openingPara = ${JSON.stringify(openingPara)};
   const stmtIntro = ${JSON.stringify(stmtIntro)};
@@ -2283,8 +2289,15 @@ function buildLetterHTML(name, reasons, additional) {
     html += reasons.length > 0 ? '<p>I would also like to mention: ' + additional + '</p>' : '<p>' + additional + '</p>';
   }
   if (closingLine) html += '<p>' + closingLine + '</p>';
-  html += '<p>Kind regards,<br>' + name + '</p>';
   return html;
+}
+
+function buildSignOffHTML(name) {
+  return '<p>Kind regards,<br>' + name + '</p>';
+}
+
+function buildLetterHTML(name, reasons, additional) {
+  return buildLetterBodyHTML(reasons, additional) + buildSignOffHTML(name);
 }
 
 ${previewEnabled ? `
@@ -2299,7 +2312,8 @@ function generatePreview(event) {
   const email = document.getElementById('email').value.trim();
   const additional = document.getElementById('additionalcomments').value.trim();
   const reasons = Array.from(document.querySelectorAll('input[name="reasons"]:checked')).map(cb => cb.value);
-  document.getElementById('letter-preview').innerHTML = buildLetterHTML(name, reasons, additional);
+  document.getElementById('letter-preview').innerHTML = buildLetterBodyHTML(reasons, additional);
+  document.getElementById('letter-signoff').innerHTML = buildSignOffHTML(name);
   document.getElementById('hidden-name').value = name;
   document.getElementById('hidden-email').value = email;
   document.getElementById('letter-form-container').style.display = 'none';
@@ -2309,8 +2323,10 @@ function generatePreview(event) {
 
 function finaliseSubmission(event) {
   event.preventDefault();
-  const letterHTML = document.getElementById('letter-preview').innerHTML.trim();
-  if (!letterHTML) { alert('Your letter cannot be empty.'); return; }
+  const letterBody = document.getElementById('letter-preview').innerHTML.trim();
+  if (!letterBody) { alert('Your letter cannot be empty.'); return; }
+  const signOff = document.getElementById('letter-signoff').innerHTML;
+  const letterHTML = letterBody + signOff;
   const name = document.getElementById('hidden-name').value;
   const email = document.getElementById('hidden-email').value;
   submitToZapier(name, email, letterHTML);
