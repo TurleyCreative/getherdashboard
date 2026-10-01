@@ -1944,7 +1944,7 @@ function renderFormPreview() {
   if (ageEnabled || genderEnabled) {
     if (ageEnabled) {
       const aqText = gv('ageQuestion') || 'What is your age?';
-      html += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:10px 0 6px">${escHtml(aqText)}</p>`;
+      html += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:10px 0 6px">${escHtml(aqText)} <span style="font-weight:400;color:var(--ink-faint)">(optional)</span></p>`;
       if (demoLayout === 'horizontal') {
         html += `<div style="display:flex;flex-wrap:wrap;gap:5px 10px;margin-bottom:8px;">`;
         ageOptions.forEach(o => {
@@ -1959,7 +1959,7 @@ function renderFormPreview() {
     }
     if (genderEnabled) {
       const gqText = gv('genderQuestion') || 'How do you describe your gender?';
-      html += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:12px 0 6px">${escHtml(gqText)}</p>`;
+      html += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:12px 0 6px">${escHtml(gqText)} <span style="font-weight:400;color:var(--ink-faint)">(optional)</span></p>`;
       if (demoLayout === 'horizontal') {
         html += `<div style="display:flex;flex-wrap:wrap;gap:5px 10px;margin-bottom:8px;">`;
         genderOptions.forEach(o => {
@@ -2056,7 +2056,7 @@ ${checkboxHTML}
   const genderQ = gv('genderQuestion') || 'How do you describe your gender?';
 
   const ageSectionHTML = ageEnabled ? `
-    <div class="sub-heading">${escHtml(ageQ)}</div>
+    <div class="sub-heading">${escHtml(ageQ)} <span class="req-marker">(optional)</span></div>
     ${demoLayout === 'horizontal'
       ? `<div style="display:flex; flex-wrap:wrap; gap:6px 16px; margin-bottom:10px;">\n    ${ageOptions.map(o => `<label style="margin:0;"><input type="radio" name="age_group" value="${escHtml(o)}"> ${escHtml(o)}</label>`).join('\n    ')}\n    </div>`
       : ageOptions.map(o => `<label><input type="radio" name="age_group" value="${escHtml(o)}"> ${escHtml(o)}</label><br>`).join('\n    ')
@@ -2064,7 +2064,7 @@ ${checkboxHTML}
   ` : '';
 
   const genderSectionHTML = genderEnabled ? `
-    <div class="sub-heading">${escHtml(genderQ)}</div>
+    <div class="sub-heading">${escHtml(genderQ)} <span class="req-marker">(optional)</span></div>
     ${demoLayout === 'horizontal'
       ? `<div style="display:flex; flex-wrap:wrap; gap:6px 16px; margin-bottom:10px;">\n    ${genderOptions.map(o => `<label style="margin:0;"><input type="radio" name="gender" value="${escHtml(o)}"> ${escHtml(o)}</label>`).join('\n    ')}\n    </div>`
       : genderOptions.map(o => `<label><input type="radio" name="gender" value="${escHtml(o)}"> ${escHtml(o)}</label><br>`).join('\n    ')
@@ -2159,6 +2159,12 @@ ${checkboxHTML}
       font-family: inherit;
     }
     .gether-support-form button:hover { opacity: 0.88; }
+    .gether-support-form button.btn-secondary {
+      background: transparent;
+      color: ${primaryColor};
+      border: 1.5px solid ${primaryColor};
+      margin-right: 10px;
+    }
     .gether-support-form #letter-preview-wrap {
       min-height: 380px;
       border: 1px solid #ccc;
@@ -2183,6 +2189,10 @@ ${checkboxHTML}
   <div class="sub-heading">About you (required)</div>
 
   <form id="support-form" onsubmit="${previewEnabled ? 'generatePreview' : 'directSubmit'}(event)">
+    <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
+      <label for="website">Leave this field blank</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+    </div>
     <label for="name">Your Name <span class="req-marker">(required)</span></label>
     <input type="text" id="name" name="name" required>
 
@@ -2225,6 +2235,7 @@ ${previewEnabled ? `<div id="preview-section" class="section-box">
     </div>
     <input type="hidden" id="hidden-name" name="name">
     <input type="hidden" id="hidden-email" name="email">
+    <button type="button" class="btn-secondary" onclick="goBackToForm()">\u2190 Back</button>
     <button type="submit">${escHtml(submitBtnText)}</button>
   </form>
 </div>` : ''}
@@ -2321,6 +2332,12 @@ function generatePreview(event) {
   document.getElementById('preview-section').scrollIntoView({ behavior: 'smooth' });
 }
 
+function goBackToForm() {
+  document.getElementById('preview-section').style.display = 'none';
+  document.getElementById('letter-form-container').style.display = 'block';
+  document.getElementById('letter-form-container').scrollIntoView({ behavior: 'smooth' });
+}
+
 function finaliseSubmission(event) {
   event.preventDefault();
   const letterBody = document.getElementById('letter-preview').innerHTML.trim();
@@ -2349,6 +2366,8 @@ function directSubmit(event) {
 `}
 
 function submitToZapier(name, email, letterHTML) {
+  const honeypot = document.getElementById('website').value;
+  if (honeypot) return;
   const address1 = document.getElementById('address1').value.trim();
   const address2 = document.getElementById('address2').value.trim();
   const citytown = document.getElementById('citytown').value.trim();
@@ -2476,14 +2495,14 @@ async function testWebhook() {
     });
     if (res.ok) {
       result.style.color = 'var(--success)';
-      result.textContent = '✓ Test sent successfully — check your Zap\'s history to confirm it arrived.';
+      result.textContent = '\u2713 Test sent successfully — check your Zap\'s history to confirm it arrived.';
     } else {
       result.style.color = 'var(--danger)';
-      result.textContent = `✗ Webhook responded with an error (status ${res.status}). Double-check the URL.`;
+      result.textContent = `\u2717 Webhook responded with an error (status ${res.status}). Double-check the URL.`;
     }
   } catch (err) {
     result.style.color = 'var(--danger)';
-    result.textContent = '✗ Could not reach that URL. Double-check it\'s correct and that your Zap is switched on.';
+    result.textContent = '\u2717 Could not reach that URL. Double-check it\'s correct and that your Zap is switched on.';
   }
 
   result.style.display = 'block';
