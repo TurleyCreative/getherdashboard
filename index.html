@@ -1748,9 +1748,16 @@ function renderStatements() {
   const c = document.getElementById('statementsContainer');
   c.innerHTML = '';
   statements.forEach((stmt, si) => {
+    const randomOn = stmt.randomPhrasing !== false;
     const card = document.createElement('div');
     card.className = 'stmt-card';
     card.innerHTML = `
+      <div class="stmt-randomize-row" style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; background:var(--mint-light); border-bottom:1px solid var(--rule-light);">
+        <span style="font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--forest);">Random phrasing</span>
+        <div class="pill-toggle" onclick="toggleRandomPhrasing(${si})" title="When on, the form picks one of several phrasings at random. When off, the statement appears in the letter exactly as written.">
+          <div class="pill-track ${randomOn ? 'on' : ''}"><div class="pill-thumb"></div></div>
+        </div>
+      </div>
       <div class="stmt-card-header" onclick="toggleStmt(${si})">
         <svg class="stmt-drag-handle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
         <div class="stmt-number">${si+1}</div>
@@ -1767,13 +1774,13 @@ function renderStatements() {
       </div>
       <div class="stmt-body ${stmt.open ? 'open' : ''}" id="stmtBody-${si}">
         <div style="font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:8px">
-          Phrasings — one chosen at random
+          ${randomOn ? 'Phrasings — one chosen at random' : 'Letter phrasing'}
         </div>
         <div id="variants-${si}"></div>
-        <button class="add-variant-btn" onclick="addVariant(${si})">
+        ${randomOn ? `<button class="add-variant-btn" onclick="addVariant(${si})">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           add phrasing
-        </button>
+        </button>` : ''}
       </div>
     `;
     c.appendChild(card);
@@ -1789,19 +1796,27 @@ function toggleStmt(si) {
   btn.classList.toggle('open', statements[si].open);
 }
 
+function toggleRandomPhrasing(si) {
+  statements[si].randomPhrasing = statements[si].randomPhrasing === false;
+  renderStatements();
+  regen();
+}
+
 function renderVariants(si) {
   const vc = document.getElementById('variants-' + si);
   if (!vc) return;
   vc.innerHTML = '';
-  statements[si].variants.forEach((v, vi) => {
+  const randomOn = statements[si].randomPhrasing !== false;
+  const variantsToShow = randomOn ? statements[si].variants : statements[si].variants.slice(0, 1);
+  variantsToShow.forEach((v, vi) => {
     const row = document.createElement('div');
     row.className = 'variant-row';
     row.innerHTML = `
-      <div class="variant-badge">${vi+1}</div>
+      ${randomOn ? `<div class="variant-badge">${vi+1}</div>` : ''}
       <textarea class="fi" onchange="statements[${si}].variants[${vi}]=this.value; regen()">${escHtml(v)}</textarea>
-      <button class="icon-btn" onclick="removeVariant(${si},${vi})" title="Remove phrasing">
+      ${randomOn ? `<button class="icon-btn" onclick="removeVariant(${si},${vi})" title="Remove phrasing">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      </button>` : ''}
     `;
     vc.appendChild(row);
   });
@@ -1831,7 +1846,8 @@ function addStatement() {
     key: 'reason' + (idx+1),
     label: '',
     open: true,
-    variants: ['', '']
+    variants: ['', ''],
+    randomPhrasing: true
   });
   renderStatements();
   regen();
@@ -2033,9 +2049,10 @@ function generateCode() {
   const fontFamilyRule = fontName ? `\n      font-family: "${fontName}", sans-serif;` : '';
   const fontLinkTag = fontName ? `\n  <link href="https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}&display=swap" rel="stylesheet">` : '';
 
-  const reasonOptionsLines = statementsEnabled ? statements.map(s =>
-    `  ${s.key}: [\n    ${s.variants.map(v => `"${jsEsc(v)}"`).join(',\n    ')}\n  ]`
-  ).join(',\n') : '';
+  const reasonOptionsLines = statementsEnabled ? statements.map(s => {
+    const variantsToUse = s.randomPhrasing === false ? [s.variants[0] || ''] : s.variants;
+    return `  ${s.key}: [\n    ${variantsToUse.map(v => `"${jsEsc(v)}"`).join(',\n    ')}\n  ]`;
+  }).join(',\n') : '';
 
   const checkboxHTML = statementsEnabled ? statements.map(s =>
     `    <label><input type="checkbox" name="reasons" value="${s.key}"> ${escHtml(s.label)}</label><br>`
@@ -2769,7 +2786,7 @@ function applyConfig(cfg) {
 
   statements = (cfg.statements && cfg.statements.length)
     ? JSON.parse(JSON.stringify(cfg.statements))
-    : [{ key: 'reason1', label: '', open: true, variants: ['', ''] }];
+    : [{ key: 'reason1', label: '', open: true, variants: ['', ''], randomPhrasing: true }];
   renderStatements();
 
   statementsEnabled = cfg.statementsEnabled !== false;
@@ -2867,7 +2884,7 @@ function importTemplatesFile(input) {
 document.getElementById('colorSwatch1').style.backgroundColor = '#4da16e';
 // Init toggle track to ON
 document.getElementById('stmtsToggleTrack').classList.add('on');
-statements = [{ key: 'reason1', label: '', open: true, variants: ['', ''] }];
+statements = [{ key: 'reason1', label: '', open: true, variants: ['', ''], randomPhrasing: true }];
 renderStatements();
 renderConsents();
 renderDemoOptions('age');
