@@ -338,6 +338,13 @@ textarea.fi { resize: vertical; min-height: 60px; }
   flex-shrink: 0;
 }
 
+.stmt-drag-handle:active { cursor: grabbing; }
+
+.stmt-card.dragging { opacity: 0.4; }
+
+.stmt-card.drag-over-top { box-shadow: inset 0 2px 0 0 var(--forest-light); }
+.stmt-card.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--forest-light); }
+
 .stmt-number {
   width: 20px; height: 20px;
   background: var(--forest);
@@ -1759,7 +1766,7 @@ function renderStatements() {
         </div>
       </div>
       <div class="stmt-card-header" onclick="toggleStmt(${si})">
-        <svg class="stmt-drag-handle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+        <svg class="stmt-drag-handle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" draggable="true" ondragstart="handleStmtDragStart(event, ${si})" ondragend="handleStmtDragEnd(event)" onclick="event.stopPropagation()"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
         <div class="stmt-number">${si+1}</div>
         <input class="stmt-label-input" type="text" value="${esc(stmt.label)}"
           onclick="event.stopPropagation()"
@@ -1783,6 +1790,9 @@ function renderStatements() {
         </button>` : ''}
       </div>
     `;
+    card.addEventListener('dragover', (e) => handleStmtDragOver(e, card));
+    card.addEventListener('dragleave', () => handleStmtDragLeave(card));
+    card.addEventListener('drop', (e) => handleStmtDrop(e, si));
     c.appendChild(card);
     renderVariants(si);
   });
@@ -1794,6 +1804,60 @@ function toggleStmt(si) {
   const btn = body.previousElementSibling.querySelector('.stmt-toggle-btn');
   body.classList.toggle('open', statements[si].open);
   btn.classList.toggle('open', statements[si].open);
+}
+
+let draggedStmtIndex = null;
+
+function handleStmtDragStart(event, si) {
+  draggedStmtIndex = si;
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', String(si));
+  const card = event.target.closest('.stmt-card');
+  if (card) card.classList.add('dragging');
+}
+
+function handleStmtDragEnd() {
+  document.querySelectorAll('.stmt-card').forEach(el => {
+    el.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom');
+  });
+  draggedStmtIndex = null;
+}
+
+function handleStmtDragOver(event, card) {
+  if (draggedStmtIndex === null) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  const rect = card.getBoundingClientRect();
+  const before = (event.clientY - rect.top) < rect.height / 2;
+  card.classList.toggle('drag-over-top', before);
+  card.classList.toggle('drag-over-bottom', !before);
+}
+
+function handleStmtDragLeave(card) {
+  card.classList.remove('drag-over-top', 'drag-over-bottom');
+}
+
+function handleStmtDrop(event, targetIndex) {
+  event.preventDefault();
+  const card = event.currentTarget;
+  const dropBefore = card.classList.contains('drag-over-top');
+  card.classList.remove('drag-over-top', 'drag-over-bottom');
+
+  if (draggedStmtIndex === null || draggedStmtIndex === targetIndex) return;
+
+  // Commit any pending edit (with its still-correct index) before reordering —
+  // otherwise a late native "change" fires after rebuild with a now-stale index.
+  if (document.activeElement) document.activeElement.blur();
+
+  const [moved] = statements.splice(draggedStmtIndex, 1);
+  let insertAt = targetIndex;
+  if (draggedStmtIndex < targetIndex) insertAt -= 1;
+  if (!dropBefore) insertAt += 1;
+  statements.splice(insertAt, 0, moved);
+
+  draggedStmtIndex = null;
+  renderStatements();
+  regen();
 }
 
 function toggleRandomPhrasing(si) {
@@ -1835,6 +1899,7 @@ function addVariant(si) {
 
 function removeVariant(si, vi) {
   if (statements[si].variants.length <= 1) return;
+  if (document.activeElement) document.activeElement.blur();
   statements[si].variants.splice(vi, 1);
   renderStatements();
   regen();
@@ -1858,6 +1923,7 @@ function addStatement() {
 }
 
 function removeStatement(si) {
+  if (document.activeElement) document.activeElement.blur();
   statements.splice(si, 1);
   renderStatements();
   regen();
