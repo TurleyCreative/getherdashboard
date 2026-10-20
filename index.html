@@ -332,18 +332,28 @@ textarea.fi { resize: vertical; min-height: 60px; }
   cursor: pointer;
 }
 
-.stmt-drag-handle {
-  color: var(--ink-faint);
-  cursor: grab;
+.stmt-reorder-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   flex-shrink: 0;
 }
 
-.stmt-drag-handle:active { cursor: grabbing; }
+.stmt-reorder-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 1px;
+  color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
 
-.stmt-card.dragging { opacity: 0.4; }
-
-.stmt-card.drag-over-top { box-shadow: inset 0 2px 0 0 var(--forest-light); }
-.stmt-card.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--forest-light); }
+.stmt-reorder-btn:hover:not(:disabled) { background: var(--sand); color: var(--forest-light); }
+.stmt-reorder-btn:disabled { opacity: 0.25; cursor: default; }
 
 .stmt-number {
   width: 20px; height: 20px;
@@ -1418,6 +1428,10 @@ textarea.fi { resize: vertical; min-height: 60px; }
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           Each statement gets a checkbox. Add multiple phrasings per statement — the form picks one at random, making every letter slightly different.
         </div>
+        <div class="field">
+          <label>Statements section title</label>
+          <input class="fi" type="text" id="stmtsTitle" value="I support this application because" oninput="regen()">
+        </div>
         <div id="statementsContainer"></div>
         <button class="add-stmt-btn" onclick="addStatement()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1766,7 +1780,14 @@ function renderStatements() {
         </div>
       </div>
       <div class="stmt-card-header" onclick="toggleStmt(${si})">
-        <svg class="stmt-drag-handle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" draggable="true" ondragstart="handleStmtDragStart(event, ${si})" ondragend="handleStmtDragEnd(event)" onclick="event.stopPropagation()"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+        <div class="stmt-reorder-btns" onclick="event.stopPropagation()">
+          <button class="stmt-reorder-btn" ${si === 0 ? 'disabled' : ''} onclick="moveStatement(${si}, -1)" title="Move up">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          </button>
+          <button class="stmt-reorder-btn" ${si === statements.length - 1 ? 'disabled' : ''} onclick="moveStatement(${si}, 1)" title="Move down">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
         <div class="stmt-number">${si+1}</div>
         <input class="stmt-label-input" type="text" value="${esc(stmt.label)}"
           onclick="event.stopPropagation()"
@@ -1790,9 +1811,6 @@ function renderStatements() {
         </button>` : ''}
       </div>
     `;
-    card.addEventListener('dragover', (e) => handleStmtDragOver(e, card));
-    card.addEventListener('dragleave', () => handleStmtDragLeave(card));
-    card.addEventListener('drop', (e) => handleStmtDrop(e, si));
     c.appendChild(card);
     renderVariants(si);
   });
@@ -1806,56 +1824,16 @@ function toggleStmt(si) {
   btn.classList.toggle('open', statements[si].open);
 }
 
-let draggedStmtIndex = null;
-
-function handleStmtDragStart(event, si) {
-  draggedStmtIndex = si;
-  event.dataTransfer.effectAllowed = 'move';
-  event.dataTransfer.setData('text/plain', String(si));
-  const card = event.target.closest('.stmt-card');
-  if (card) card.classList.add('dragging');
-}
-
-function handleStmtDragEnd() {
-  document.querySelectorAll('.stmt-card').forEach(el => {
-    el.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom');
-  });
-  draggedStmtIndex = null;
-}
-
-function handleStmtDragOver(event, card) {
-  if (draggedStmtIndex === null) return;
-  event.preventDefault();
-  event.dataTransfer.dropEffect = 'move';
-  const rect = card.getBoundingClientRect();
-  const before = (event.clientY - rect.top) < rect.height / 2;
-  card.classList.toggle('drag-over-top', before);
-  card.classList.toggle('drag-over-bottom', !before);
-}
-
-function handleStmtDragLeave(card) {
-  card.classList.remove('drag-over-top', 'drag-over-bottom');
-}
-
-function handleStmtDrop(event, targetIndex) {
-  event.preventDefault();
-  const card = event.currentTarget;
-  const dropBefore = card.classList.contains('drag-over-top');
-  card.classList.remove('drag-over-top', 'drag-over-bottom');
-
-  if (draggedStmtIndex === null || draggedStmtIndex === targetIndex) return;
+function moveStatement(si, direction) {
+  const target = si + direction;
+  if (target < 0 || target >= statements.length) return;
 
   // Commit any pending edit (with its still-correct index) before reordering —
   // otherwise a late native "change" fires after rebuild with a now-stale index.
   if (document.activeElement) document.activeElement.blur();
 
-  const [moved] = statements.splice(draggedStmtIndex, 1);
-  let insertAt = targetIndex;
-  if (draggedStmtIndex < targetIndex) insertAt -= 1;
-  if (!dropBefore) insertAt += 1;
-  statements.splice(insertAt, 0, moved);
-
-  draggedStmtIndex = null;
+  const [moved] = statements.splice(si, 1);
+  statements.splice(target, 0, moved);
   renderStatements();
   regen();
 }
@@ -2057,7 +2035,8 @@ function renderFormPreview() {
   }
 
   if (statementsEnabled && statements.length > 0) {
-    html += `<div class="lp-section-head" style="margin-top:18px">I support this application because</div>
+    const stmtsTitleText = gv('stmtsTitle') || 'I support this application because';
+    html += `<div class="lp-section-head" style="margin-top:18px">${escHtml(stmtsTitleText)}</div>
     <p style="font-size:12px; color:var(--ink-soft); margin-bottom:10px">Tick as many as apply — your selected reasons will be included in your letter.</p>`;
     statements.forEach(s => {
       html += `<div class="lp-check-item">
@@ -2124,8 +2103,10 @@ function generateCode() {
     `    <label><input type="checkbox" name="reasons" value="${s.key}"> ${escHtml(s.label)}</label><br>`
   ).join('\n') : '';
 
+  const stmtsTitle = gv('stmtsTitle') || 'I support this application because';
+
   const stmtSectionHTML = statementsEnabled && statements.length > 0 ? `
-    <h4>I support this application because:</h4>
+    <h4>${escHtml(stmtsTitle)}</h4>
     <p>Tick as many as apply — your selected reasons will be included in your letter:</p>
 
 ${checkboxHTML}
@@ -2824,6 +2805,7 @@ function collectCurrentConfig() {
     stmtIntro: gv('stmtIntro'),
     closingLine: gv('closingLine'),
     commentsPrompt: gv('commentsPrompt'),
+    stmtsTitle: gv('stmtsTitle'),
     generateBtnText: gv('generateBtnText'),
     submitBtnText: gv('submitBtnText'),
     ageEnabled: ageEnabled,
@@ -2872,6 +2854,7 @@ function applyConfig(cfg) {
   document.getElementById('stmtIntro').value = cfg.stmtIntro || '';
   document.getElementById('closingLine').value = cfg.closingLine || '';
   document.getElementById('commentsPrompt').value = cfg.commentsPrompt || '';
+  document.getElementById('stmtsTitle').value = cfg.stmtsTitle || 'I support this application because';
   document.getElementById('generateBtnText').value = cfg.generateBtnText || '';
   document.getElementById('submitBtnText').value = cfg.submitBtnText || '';
 
