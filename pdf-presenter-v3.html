@@ -192,6 +192,71 @@
   .toast.show { display: block; }
   .loading { color: var(--muted); }
 
+  /* ---------- Tooltips ---------- */
+  [data-tip] { position: relative; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    width: max-content; max-width: 260px;
+    padding: 7px 10px; border-radius: 6px;
+    background: var(--text); color: #fff;
+    font: 400 12.5px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-style: normal; text-align: left; white-space: normal;
+    opacity: 0; pointer-events: none; transition: opacity .12s; z-index: 30;
+  }
+  [data-tip]:hover::after, [data-tip]:focus-visible::after { opacity: 1; transition-delay: .25s; }
+  [data-tip].tip-end::after { left: auto; right: 0; transform: none; }
+  .info {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid var(--navy); color: var(--navy);
+    font: italic 700 12px/1 Georgia, serif; cursor: help; flex: none;
+  }
+
+  /* ---------- Resume (upload screen) ---------- */
+  .ver { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--panel-2); border-radius: 999px; padding: 2px 8px; vertical-align: 4px; margin-left: 6px; }
+  .resume { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .resume-head { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .resume h2 { margin: 0; font-size: 16px; color: var(--navy); }
+  .resume p { margin: 6px 0 14px; font-size: 14px; }
+  .pending {
+    margin-top: 14px; padding: 10px 12px; text-align: left; font-size: 14px;
+    background: rgba(42, 164, 151, .08); border: 1px solid var(--teal); border-radius: 8px;
+  }
+  .pending .next { margin-top: 4px; font-weight: 600; color: var(--teal); }
+  button.link { background: none; border: 0; padding: 0; color: var(--navy); text-decoration: underline; cursor: pointer; }
+
+  /* ---------- Save & resume panel ---------- */
+  .save-open .unsaved-dot { display: none; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); margin-left: 7px; vertical-align: 1px; }
+  .save-open.unsaved .unsaved-dot { display: inline-block; }
+  .scrim { position: fixed; inset: 0; background: rgba(37, 37, 37, .28); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(430px, 100%);
+    display: flex; flex-direction: column;
+    background: var(--panel);
+    transform: translateX(100%); visibility: hidden;
+    transition: transform .22s ease, visibility 0s .22s; z-index: 41;
+  }
+  .drawer.open { transform: none; visibility: visible; transition: transform .22s ease; box-shadow: -8px 0 30px rgba(37, 37, 37, .15); }
+  .drawer-inner { flex: 1; overflow-y: auto; padding: 18px 22px 24px; }
+  .drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .drawer-head h2 { margin: 0; font-size: 20px; color: var(--navy); }
+  .drawer-head button { border: 0; background: none; font-size: 18px; padding: 4px 8px; }
+  .save-status { padding: 10px 12px; border-radius: 8px; font-size: 14px; margin-bottom: 18px; border: 1px solid var(--line); background: var(--panel-2); }
+  .save-status.warn { background: #FFF6E6; border-color: #E2C48F; color: #6B4300; }
+  .save-status.ok { background: rgba(42, 164, 151, .08); border-color: var(--teal); color: #1B6E65; }
+  .drawer-sec { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .drawer-sec h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font-size: 15px; }
+  .drawer-sec p { margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+  .drawer-sec p:last-child { margin-bottom: 0; }
+  .step { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; font-size: 13px; font-weight: 700; flex: none; }
+  .step.s1 { background: var(--navy); } .step.s2 { background: var(--sky); } .step.s3 { background: var(--teal); }
+  .kbd { font-size: 12px; color: var(--muted); margin-left: 8px; }
+  .kbd kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; background: var(--panel-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; }
+  .tipbox { margin-top: 18px; padding: 12px 14px; font-size: 13.5px; background: #EEF6FC; border-left: 4px solid var(--sky); border-radius: 6px; }
+  .tipbox p { margin: 0 0 6px; } .tipbox p:last-child { margin: 0; }
+
   @media (max-width: 900px) {
     .thumbs { display: none; }
     .editor-body { flex-direction: column; }
@@ -206,17 +271,26 @@
 <section id="upload" class="view active">
   <div class="drop" id="drop">
     <span class="logo" role="img" aria-label="Turley"></span>
-    <h1>PDF Presenter</h1>
+    <h1>PDF Presenter <span class="ver">v3</span></h1>
     <p class="muted">Upload a PDF, add speaker notes to each page, then present with a private speaker view.</p>
     <button class="primary" id="chooseBtn">Choose PDF</button>
     <p class="muted" style="margin:12px 0 0;font-size:13px">or drag and drop it here</p>
     <ol class="how muted">
-      <li>Add notes to each page. They save automatically in this browser.</li>
+      <li>Add notes to each page. Use <b>Save &amp; resume</b> to save them to a file so you can stop and carry on later.</li>
       <li>Click <b>Present</b>. A separate <b>audience window</b> opens with just the slides.</li>
       <li>In Teams, Zoom or Meet, share <b>that window only</b>. Your notes stay on this screen.</li>
     </ol>
+    <div class="resume">
+      <div class="resume-head">
+        <h2>Coming back to a presentation?</h2>
+        <span class="info" tabindex="0" data-tip="Choose the notes file (.json) you saved earlier, then the matching PDF. You can also drag both files onto this box at once.">i</span>
+      </div>
+      <p class="muted">Load your saved notes file, then choose the PDF.</p>
+      <button id="resumeBtn">Load saved notes file</button>
+      <div class="pending" id="pendingInfo" hidden></div>
+    </div>
   </div>
-  <input type="file" id="fileInput" accept="application/pdf,.pdf">
+  <input type="file" id="fileInput" accept="application/pdf,.pdf,application/json,.json" multiple>
 </section>
 
 <!-- Editor -->
@@ -228,10 +302,9 @@
     <span class="title" id="docTitle"></span>
     <span class="muted" id="docInfo"></span>
     <span class="spacer"></span>
-    <button id="importBtn" title="Load notes from a .json file">Import notes</button>
-    <button id="exportBtn" title="Download notes as a .json file">Export notes</button>
-    <button id="newBtn">New PDF</button>
-    <button class="primary" id="presentBtn">▶ Present</button>
+    <button id="saveOpen" class="save-open" data-tip="Save your notes to a file so you can close this and carry on later. Shortcut: Ctrl+S saves straight away.">Save &amp; resume<span class="unsaved-dot"></span></button>
+    <button id="newBtn" data-tip="Start again with a different PDF. Your notes for this one stay backed up in this browser.">New PDF</button>
+    <button class="primary tip-end" id="presentBtn" data-tip="Opens your speaker view here, plus a separate audience window that you share in Teams, Zoom or Meet.">▶ Present</button>
   </div>
   <div class="editor-body">
     <nav class="thumbs" id="thumbs"></nav>
@@ -246,7 +319,7 @@
         <span class="spacer"></span>
         <span class="muted" id="edCounter"></span>
       </div>
-      <div class="save-state" id="saveState">Notes save in this browser automatically.</div>
+      <div class="save-state" id="saveState"></div>
     </aside>
   </div>
   <input type="file" id="importInput" accept="application/json,.json">
@@ -289,6 +362,41 @@
   </div>
 </section>
 
+<!-- Save & resume panel -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="savePanel" role="dialog" aria-modal="true" aria-labelledby="saveTitle" inert>
+  <div class="stripe"></div>
+  <div class="drawer-inner">
+    <div class="drawer-head">
+      <h2 id="saveTitle">Save &amp; resume</h2>
+      <button id="saveClose" aria-label="Close">✕</button>
+    </div>
+    <div class="save-status" id="saveStatus"></div>
+
+    <div class="drawer-sec">
+      <h3><span class="step s1">1</span>Save your progress</h3>
+      <p>Downloads a small <b>notes file</b> (.json) to your Downloads folder. It contains your notes only, not the PDF.</p>
+      <button class="primary" id="saveFileBtn">Save notes file</button><span class="kbd">or press <kbd>Ctrl</kbd> + <kbd>S</kbd></span>
+    </div>
+
+    <div class="drawer-sec">
+      <h3><span class="step s2">2</span>Keep it with your PDF</h3>
+      <p>Move the notes file into the same folder as your PDF so the two stay together. Each save is a complete copy of all your notes, so you can save as often as you like.</p>
+    </div>
+
+    <div class="drawer-sec">
+      <h3><span class="step s3">3</span>Pick up where you left off</h3>
+      <p>Next time, open this tool and drag <b>both files</b> (the PDF and its notes file) onto the start screen. Or, with the PDF already open, load the notes file here.</p>
+      <button id="loadFileBtn">Load notes file</button>
+    </div>
+
+    <div class="tipbox">
+      <p><b>Saved more than once?</b> Your browser may name later copies <i>notes (1).json</i>, <i>notes (2).json</i> and so on. Use the newest one.</p>
+      <p><b>Automatic backup:</b> this browser also keeps a copy of your notes for each PDF. It’s lost if you clear your browsing data, use a private window or switch computer, so always save a notes file for anything important.</p>
+    </div>
+  </div>
+</aside>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -301,7 +409,12 @@ const $ = id => document.getElementById(id);
 const state = {
   pdf: null,
   fileName: '',
+  fileSize: 0,
   storageKey: '',
+  pending: null,       // notes file loaded before its PDF
+  dirty: false,        // notes changed since the last notes-file save
+  lastFileSave: null,  // Date of the last notes-file save/load
+  localOk: true,
   notes: {},
   page: 1,
   presenting: false,
@@ -320,6 +433,38 @@ function loadStore(key, fallback) {
 function saveStore(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
 }
+
+/* Browser backup of the current PDF's notes. Older versions stored the
+   notes object directly, newer ones wrap it with a timestamp. */
+function loadLocal() {
+  const v = loadStore(state.storageKey, null);
+  if (v && v.notes) return v;
+  return { notes: v || {}, updatedAt: 0 };
+}
+function saveLocal() {
+  return saveStore(state.storageKey, { notes: state.notes, updatedAt: Date.now() });
+}
+
+function countNotes(notes) {
+  return Object.values(notes).filter(n => typeof n === 'string' && n.trim()).length;
+}
+function cleanNotes(notes) {
+  const out = {};
+  for (const [k, v] of Object.entries(notes)) if (typeof v === 'string' && v.trim()) out[k] = v;
+  return out;
+}
+function sameNotes(a, b) {
+  const norm = n => JSON.stringify(Object.entries(cleanNotes(n)).sort((x, y) => x[0] - y[0]));
+  return norm(a) === norm(b);
+}
+function fmtTime(d) {
+  if (!d || isNaN(d)) return '';
+  const today = new Date().toDateString() === d.toDateString();
+  return today
+    ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 /* ---------- Toast ---------- */
 let toastTimer;
@@ -341,6 +486,7 @@ function show(view) {
    A per-target token makes sure only the latest request is drawn, so quick
    page flips never paint a stale page. */
 const renderTokens = new WeakMap();
+let saveTimer;
 
 async function renderPage(num, target, maxW, maxH) {
   const token = (renderTokens.get(target) || 0) + 1;
@@ -375,6 +521,7 @@ async function openFile(file) {
     return;
   }
   toast('Loading ' + file.name + '…', 60000);
+  clearTimeout(saveTimer);
   try {
     const data = new Uint8Array(await file.arrayBuffer());
     const pdf = await pdfjsLib.getDocument({
@@ -386,16 +533,31 @@ async function openFile(file) {
     if (state.pdf) state.pdf.destroy();
     state.pdf = pdf;
     state.fileName = file.name;
+    state.fileSize = file.size;
     state.storageKey = `pdf-presenter:${file.name}:${file.size}:${pdf.numPages}`;
-    state.notes = loadStore(state.storageKey, {});
+    const local = loadLocal();
+    state.notes = local.notes;
     state.page = 1;
+    state.dirty = false;
+    state.lastFileSave = null;
     $('docTitle').textContent = file.name;
-    $('docInfo').textContent = `${pdf.numPages} page${pdf.numPages === 1 ? '' : 's'}`;
+    $('docInfo').textContent = plural(pdf.numPages, 'page');
     show('editor');
     buildThumbs();
+    let msg;
+    if (state.pending) {
+      msg = applySavedNotes(state.pending, local);
+      state.pending = null;
+      renderPending();
+    } else {
+      const count = countNotes(state.notes);
+      msg = count
+        ? `Loaded. Restored notes for ${plural(count, 'page')} from this browser’s backup.`
+        : 'Loaded. Add your notes on the right, then use Save & resume to keep a copy.';
+    }
     gotoEditorPage(1);
-    const count = Object.values(state.notes).filter(n => n.trim()).length;
-    toast(count ? `Loaded. Restored notes for ${count} page${count === 1 ? '' : 's'}.` : 'Loaded. Add your notes on the right.');
+    updateSaveUI();
+    toast(msg, 7000);
   } catch (err) {
     console.error(err);
     toast('Couldn’t open that PDF: ' + (err.message || err));
@@ -404,14 +566,39 @@ async function openFile(file) {
 
 $('chooseBtn').onclick = () => $('fileInput').click();
 $('newBtn').onclick = () => $('fileInput').click();
-$('fileInput').onchange = e => { openFile(e.target.files[0]); e.target.value = ''; };
+$('fileInput').onchange = e => { handleFiles(e.target.files); e.target.value = ''; };
+
+const isPdf = f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+const isJson = f => f.type === 'application/json' || /\.json$/i.test(f.name);
+
+/* Accepts a PDF, a notes file, or both together (in any order). */
+async function handleFiles(files) {
+  const list = [...files];
+  const json = list.find(isJson);
+  const pdfFile = list.find(isPdf);
+  if (!json && !pdfFile) {
+    toast('Choose a PDF, or a notes file (.json) saved from this tool.');
+    return;
+  }
+  if (json) {
+    const data = await readNotesFile(json);
+    if (!data) return;
+    if (pdfFile || !state.pdf) {
+      state.pending = data;
+      renderPending();
+    } else {
+      applyToOpenPdf(data);
+    }
+  }
+  if (pdfFile) await openFile(pdfFile);
+}
 
 const drop = $('drop');
 ['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave', 'drop'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
 document.addEventListener('drop', e => {
-  const file = e.dataTransfer && e.dataTransfer.files[0];
-  if (file && !state.presenting) openFile(file);
+  const files = e.dataTransfer && e.dataTransfer.files;
+  if (files && files.length && !state.presenting) handleFiles(files);
 });
 
 /* ---------- Editor ---------- */
@@ -458,16 +645,14 @@ function gotoEditorPage(n) {
   renderPage(state.page, $('stageCanvas'), w - 40, h - 40);
 }
 
-let saveTimer;
 $('notesInput').addEventListener('input', e => {
   state.notes[state.page] = e.target.value;
-  $('saveState').textContent = 'Saving…';
+  state.dirty = true;
+  updateSaveUI();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    const ok = saveStore(state.storageKey, state.notes);
-    $('saveState').textContent = ok
-      ? 'Saved in this browser.'
-      : 'Couldn’t save in this browser. Use Export notes to keep a copy.';
+    state.localOk = saveLocal();
+    updateSaveUI();
     refreshThumbFlags();
   }, 400);
 });
@@ -475,33 +660,154 @@ $('notesInput').addEventListener('input', e => {
 $('edPrev').onclick = () => gotoEditorPage(state.page - 1);
 $('edNext').onclick = () => gotoEditorPage(state.page + 1);
 
-$('exportBtn').onclick = () => {
-  const payload = { file: state.fileName, pages: state.pdf.numPages, notes: state.notes };
+/* ---------- Save & resume ---------- */
+function needsSave() {
+  return state.dirty || (!state.lastFileSave && countNotes(state.notes) > 0);
+}
+
+function updateSaveUI() {
+  const pending = needsSave();
+  const saved = fmtTime(state.lastFileSave);
+  $('saveOpen').classList.toggle('unsaved', pending);
+
+  const status = $('saveStatus');
+  if (pending && saved) {
+    status.className = 'save-status warn';
+    status.textContent = `You’ve made changes since your last save at ${saved}. Save again to keep them.`;
+  } else if (pending) {
+    status.className = 'save-status warn';
+    status.textContent = 'Your notes haven’t been saved to a file yet.';
+  } else if (saved) {
+    status.className = 'save-status ok';
+    status.textContent = `All notes saved to file at ${saved}.`;
+  } else {
+    status.className = 'save-status';
+    status.textContent = 'Nothing to save yet. Add some notes first.';
+  }
+
+  const backup = state.localOk ? 'Backed up in this browser. ' : 'Couldn’t back up in this browser. ';
+  $('saveState').textContent = backup + (pending
+    ? (saved ? `Changes since your last save at ${saved}.` : 'Not saved to a file yet.') + ' Press Ctrl+S to save.'
+    : saved ? `Saved to file at ${saved}.` : '');
+}
+
+function saveNotesFile() {
+  if (!state.pdf) return;
+  clearTimeout(saveTimer);
+  state.localOk = saveLocal();
+  const savedAt = new Date();
+  const payload = {
+    app: 'Turley PDF Presenter',
+    appVersion: 3,
+    file: state.fileName,
+    size: state.fileSize,
+    pages: state.pdf.numPages,
+    savedAt: savedAt.toISOString(),
+    notes: cleanNotes(state.notes),
+  };
+  const name = state.fileName.replace(/\.pdf$/i, '') + ' - notes.json';
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = state.fileName.replace(/\.pdf$/i, '') + ' - notes.json';
+  a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-};
-$('importBtn').onclick = () => $('importInput').click();
-$('importInput').onchange = async e => {
-  const file = e.target.files[0];
-  e.target.value = '';
-  if (!file) return;
+  state.dirty = false;
+  state.lastFileSave = savedAt;
+  updateSaveUI();
+  toast(`Saved “${name}” to your Downloads folder. Keep it with your PDF.`, 6000);
+}
+
+async function readNotesFile(file) {
   try {
     const data = JSON.parse(await file.text());
-    const incoming = data.notes || data;
-    for (const [k, v] of Object.entries(incoming)) {
-      if (typeof v === 'string' && +k >= 1 && +k <= state.pdf.numPages) state.notes[k] = v;
-    }
-    saveStore(state.storageKey, state.notes);
-    gotoEditorPage(state.page);
-    toast('Notes imported.');
+    const notes = data && typeof data === 'object' ? (data.notes || data) : null;
+    if (!notes || typeof notes !== 'object' || Array.isArray(notes)) throw new Error('no notes');
+    return { file: data.file, pages: data.pages, savedAt: data.savedAt, notes: cleanNotes(notes) };
   } catch {
-    toast('That file isn’t a valid notes export.');
+    toast('That file isn’t a notes file saved from this tool.', 5000);
+    return null;
   }
-};
+}
+
+/* Replaces the open PDF's notes with a saved notes file. `current` is what
+   would be overwritten; if it differs, the user chooses which to keep. */
+function applySavedNotes(data, current) {
+  const total = state.pdf.numPages;
+  const fileNotes = {};
+  for (const [k, v] of Object.entries(data.notes)) if (+k >= 1 && +k <= total) fileNotes[k] = v;
+
+  if (current && countNotes(current.notes) && !sameNotes(current.notes, fileNotes)) {
+    const when = current.updatedAt ? ` (last edited ${fmtTime(new Date(current.updatedAt))})` : '';
+    const useFile = confirm(
+      `The notes already in this browser for this PDF${when} are different from the ones in your notes file.\n\n` +
+      `OK: use the notes file\nCancel: keep the notes in this browser`);
+    if (!useFile) {
+      state.dirty = true;
+      return 'Kept the notes from this browser. Save a new notes file to keep them safe.';
+    }
+  }
+
+  state.notes = fileNotes;
+  state.localOk = saveLocal();
+  state.dirty = false;
+  const savedAt = data.savedAt ? new Date(data.savedAt) : null;
+  state.lastFileSave = savedAt && !isNaN(savedAt) ? savedAt : new Date();
+
+  const warnings = [];
+  if (data.file && data.file !== state.fileName) warnings.push(`it was saved for “${data.file}”`);
+  if (data.pages && data.pages !== total) warnings.push(`it was saved for a ${data.pages}-page PDF and this one has ${total}`);
+  return `Resumed: restored notes for ${plural(countNotes(fileNotes), 'page')} from your notes file.` +
+    (warnings.length ? ` Check they line up, because ${warnings.join(' and ')}.` : '');
+}
+
+function applyToOpenPdf(data) {
+  clearTimeout(saveTimer);
+  const msg = applySavedNotes(data, { notes: state.notes, updatedAt: state.dirty ? Date.now() : loadLocal().updatedAt });
+  gotoEditorPage(state.page);
+  updateSaveUI();
+  closeDrawer();
+  toast(msg, 8000);
+}
+
+function renderPending() {
+  const el = $('pendingInfo');
+  const p = state.pending;
+  el.hidden = !p;
+  $('chooseBtn').textContent = p ? 'Choose the matching PDF' : 'Choose PDF';
+  if (!p) return;
+  const savedAt = p.savedAt ? fmtTime(new Date(p.savedAt)) : '';
+  el.innerHTML = '<b>✓ Notes file loaded.</b> <span></span> <button class="link" id="pendingClear">Remove</button>' +
+    '<div class="next">Now choose the matching PDF to carry on.</div>';
+  el.querySelector('span').textContent =
+    plural(countNotes(p.notes), 'page') + ' of notes' +
+    (p.file ? ` for “${p.file}”` : '') + (savedAt ? `, saved ${savedAt}` : '') + '.';
+  $('pendingClear').onclick = () => { state.pending = null; renderPending(); };
+}
+
+const drawerOpen = () => $('savePanel').classList.contains('open');
+function openDrawer() {
+  updateSaveUI();
+  $('savePanel').classList.add('open');
+  $('savePanel').inert = false;
+  $('scrim').classList.add('open');
+  $('saveFileBtn').focus();
+}
+function closeDrawer() {
+  if (!drawerOpen()) return;
+  $('savePanel').classList.remove('open');
+  $('savePanel').inert = true;
+  $('scrim').classList.remove('open');
+  $('saveOpen').focus();
+}
+
+$('saveOpen').onclick = openDrawer;
+$('saveClose').onclick = closeDrawer;
+$('scrim').onclick = closeDrawer;
+$('saveFileBtn').onclick = saveNotesFile;
+$('loadFileBtn').onclick = () => $('importInput').click();
+$('resumeBtn').onclick = () => $('importInput').click();
+$('importInput').onchange = e => { handleFiles(e.target.files); e.target.value = ''; };
 
 /* ---------- Audience window ---------- */
 const AUDIENCE_HTML = title => `<!doctype html><html><head><meta charset="utf-8">
@@ -665,13 +971,19 @@ $('fontUp').onclick = () => setNotesSize(2);
 $('fontDown').onclick = () => setNotesSize(-2);
 
 document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+    if (state.pdf) saveNotesFile();
+    return;
+  }
+  if (e.key === 'Escape' && drawerOpen()) { closeDrawer(); return; }
   if (state.presenting) {
     if (e.key === 'Escape') { stopPresenting(); return; }
     onPresentKey(e);
     return;
   }
   // Editor arrow-key navigation when not typing.
-  if ($('editor').classList.contains('active') && document.activeElement !== $('notesInput')) {
+  if ($('editor').classList.contains('active') && !drawerOpen() && document.activeElement !== $('notesInput')) {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); gotoEditorPage(state.page + 1); }
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); gotoEditorPage(state.page - 1); }
   }
@@ -712,7 +1024,11 @@ window.addEventListener('resize', () => {
     else if ($('editor').classList.contains('active')) gotoEditorPage(state.page);
   }, 150);
 });
-window.addEventListener('beforeunload', () => { if (audienceOpen()) state.audience.close(); });
+// Warn before closing if notes haven't been saved to a file.
+window.addEventListener('beforeunload', e => {
+  if (state.pdf && needsSave()) { e.preventDefault(); e.returnValue = ''; }
+});
+window.addEventListener('pagehide', () => { if (audienceOpen()) state.audience.close(); });
 </script>
 </body>
 </html>
