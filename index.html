@@ -1297,7 +1297,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
   </button>
 </nav>
 
-<div class="app-version">v1.34.1</div>
+<div class="app-version">v1.34.3</div>
 
 <!-- ═══════════════════════════════════════ MAIN BODY -->
 <div class="app-body">
@@ -2207,9 +2207,9 @@ ${demoSectionHTML}`;
   };
   const sectionsHTML = sectionOrder.map(key => sectionBlocks[key] || '').join('\n');
 
-  const consentHTML = consents.map(c =>
+  const consentHTML = consents.length > 0 ? `<hr class="consent-divider">\n` + consents.map(c =>
     `    <label><input type="checkbox" required> ${escHtml(c)} (required)</label><br>`
-  ).join('\n');
+  ).join('\n') : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -2233,6 +2233,8 @@ ${demoSectionHTML}`;
       margin: 20px auto;
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
+    .gether-support-form h3 { margin-top: 0; margin-bottom: 8px; }
+    .gether-support-form .consent-divider { border: none; border-top: 1px solid #ccc; margin: 24px 0 16px; }
     .gether-support-form h4 { margin-top: 20px; margin-bottom: 8px; }
     .gether-support-form .sub-heading { font-weight: 500; margin: 20px 0 8px; }
     .gether-support-form label {
@@ -2316,7 +2318,7 @@ ${demoSectionHTML}`;
 
 <div class="gether-support-form">
 <div id="letter-form-container" class="section-box">
-  <h4>${escHtml(appRef)}</h4>
+  <h3>${escHtml(appRef)}</h3>
 
   <form id="support-form" onsubmit="${previewEnabled ? 'generatePreview' : 'directSubmit'}(event)">
     <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
