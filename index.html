@@ -132,6 +132,21 @@ body {
   gap: 2px;
 }
 
+.app-version {
+  position: fixed;
+  left: 10px;
+  bottom: 8px;
+  z-index: 98;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  background: var(--warm-white);
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid var(--rule);
+  pointer-events: none;
+}
+
 .nav-tab {
   display: flex;
   align-items: center;
@@ -1282,6 +1297,8 @@ textarea.fi { resize: vertical; min-height: 60px; }
   </button>
 </nav>
 
+<div class="app-version">v1.34.1</div>
+
 <!-- ═══════════════════════════════════════ MAIN BODY -->
 <div class="app-body">
 
@@ -1367,10 +1384,10 @@ textarea.fi { resize: vertical; min-height: 60px; }
               Age question
             </span>
             <div class="pill-toggle" id="ageToggle" onclick="toggleDemo('age')" title="Enable or disable age question">
-              <div class="pill-track" id="ageToggleTrack"><div class="pill-thumb"></div></div>
+              <div class="pill-track on" id="ageToggleTrack"><div class="pill-thumb"></div></div>
             </div>
           </div>
-          <div id="ageFieldBlock" class="demo-field-disabled">
+          <div id="ageFieldBlock">
             <div class="field">
               <label>Question text</label>
               <input class="fi" type="text" id="ageQuestion" value="What is your age?" oninput="regen()">
@@ -1394,10 +1411,10 @@ textarea.fi { resize: vertical; min-height: 60px; }
               Gender question
             </span>
             <div class="pill-toggle" id="genderToggle" onclick="toggleDemo('gender')" title="Enable or disable gender question">
-              <div class="pill-track" id="genderToggleTrack"><div class="pill-thumb"></div></div>
+              <div class="pill-track on" id="genderToggleTrack"><div class="pill-thumb"></div></div>
             </div>
           </div>
-          <div id="genderFieldBlock" class="demo-field-disabled">
+          <div id="genderFieldBlock">
             <div class="field">
               <label>Question text</label>
               <input class="fi" type="text" id="genderQuestion" value="How do you describe your gender?" oninput="regen()">
@@ -1598,16 +1615,24 @@ textarea.fi { resize: vertical; min-height: 60px; }
           <div class="field">
             <label>Option layout</label>
             <div class="layout-toggle-group" id="demoLayoutToggle">
-              <button class="layout-opt active" id="layoutOptVertical" onclick="setDemoLayout('vertical')">
+              <button class="layout-opt" id="layoutOptVertical" onclick="setDemoLayout('vertical')">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="5" width="20" height="5" rx="2" fill="currentColor" opacity="0.2"/><rect x="4" y="5" width="20" height="5" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="13" width="20" height="5" rx="2" fill="currentColor" opacity="0.08"/><rect x="4" y="13" width="20" height="5" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="21" width="20" height="5" rx="2" fill="currentColor" opacity="0.08"/><rect x="4" y="21" width="20" height="5" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>
                 <span>Stacked</span>
               </button>
-              <button class="layout-opt" id="layoutOptHorizontal" onclick="setDemoLayout('horizontal')">
+              <button class="layout-opt active" id="layoutOptHorizontal" onclick="setDemoLayout('horizontal')">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="2" y="9" width="7" height="10" rx="2" fill="currentColor" opacity="0.2"/><rect x="2" y="9" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="10.5" y="9" width="7" height="10" rx="2" fill="currentColor" opacity="0.08"/><rect x="10.5" y="9" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><rect x="19" y="9" width="7" height="10" rx="2" fill="currentColor" opacity="0.08"/><rect x="19" y="9" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>
                 <span>Inline</span>
               </button>
             </div>
             <div class="hint" style="margin-top:6px;">Stacked puts each option on its own row. Inline wraps them side by side — useful when there are many short options.</div>
+          </div>
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-group-title">Section order</div>
+          <div class="field">
+            <label>Form section order</label>
+            <div id="sectionOrderList"></div>
+            <div class="hint" style="margin-top:6px;">Controls the order personal details, statements, and additional comments appear in on the generated form — e.g. move statements to the top. The webhook, consent checkboxes, and submit button always stay at the end.</div>
           </div>
         </div>
       </div>
@@ -1649,7 +1674,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
         <div id="templatesUnlocked" style="display:none;">
           <div class="info-box" style="margin-bottom:14px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Loading a template replaces every field in the builder (except the webhook URL, which is always left blank for you to fill in per client). Templates are saved in this browser only — use Export/Import to share them with teammates.
+            Loading a template replaces every field in the builder (except the webhook URL, which is always left blank for you to fill in per client). Templates are saved in this browser only. Export downloads your current setup as a .json file — hand it to a teammate and they can Import it to add it as a template in their own browser.
           </div>
           <div id="templatesContainer"></div>
           <button class="add-stmt-btn" onclick="saveCurrentAsTemplate()">
@@ -1657,7 +1682,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
             Save current setup as template
           </button>
           <div style="display:flex; gap:8px; margin-top:10px;">
-            <button class="add-stmt-btn" style="flex:1;" onclick="exportTemplates()">Export (.json)</button>
+            <button class="add-stmt-btn" style="flex:1;" onclick="exportTemplates()">Export current setup (.json)</button>
             <button class="add-stmt-btn" style="flex:1;" onclick="document.getElementById('templatesImportInput').click()">Import (.json)</button>
             <input type="file" id="templatesImportInput" accept="application/json" style="display:none" onchange="importTemplatesFile(this)">
           </div>
@@ -1972,7 +1997,9 @@ function renderFormPreview() {
 
   let html = `
     <div class="lp-title">${escHtml(appRef) || 'Your form title will appear here'}</div>
+  `;
 
+  let personalBlock = `
     <div class="lp-section-head">Your details</div>
 
     <div class="lp-field-row">
@@ -2004,42 +2031,43 @@ function renderFormPreview() {
   if (ageEnabled || genderEnabled) {
     if (ageEnabled) {
       const aqText = gv('ageQuestion') || 'What is your age?';
-      html += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:10px 0 6px">${escHtml(aqText)} <span style="font-weight:400;color:var(--ink-faint)">(optional)</span></p>`;
+      personalBlock += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:10px 0 6px">${escHtml(aqText)} <span style="font-weight:400;color:var(--ink-faint)">(optional)</span></p>`;
       if (demoLayout === 'horizontal') {
-        html += `<div style="display:flex;flex-wrap:wrap;gap:5px 10px;margin-bottom:8px;">`;
+        personalBlock += `<div style="display:flex;flex-wrap:wrap;gap:5px 10px;margin-bottom:8px;">`;
         ageOptions.forEach(o => {
-          html += `<div class="lp-check-item" style="margin-bottom:0;padding:6px 10px;flex-shrink:0;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
+          personalBlock += `<div class="lp-check-item" style="margin-bottom:0;padding:6px 10px;flex-shrink:0;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
         });
-        html += `</div>`;
+        personalBlock += `</div>`;
       } else {
         ageOptions.forEach(o => {
-          html += `<div class="lp-check-item" style="margin-bottom:4px;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
+          personalBlock += `<div class="lp-check-item" style="margin-bottom:4px;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
         });
       }
     }
     if (genderEnabled) {
       const gqText = gv('genderQuestion') || 'How do you describe your gender?';
-      html += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:12px 0 6px">${escHtml(gqText)} <span style="font-weight:400;color:var(--ink-faint)">(optional)</span></p>`;
+      personalBlock += `<p style="font-size:12px;font-weight:600;color:var(--ink-mid);margin:12px 0 6px">${escHtml(gqText)} <span style="font-weight:400;color:var(--ink-faint)">(optional)</span></p>`;
       if (demoLayout === 'horizontal') {
-        html += `<div style="display:flex;flex-wrap:wrap;gap:5px 10px;margin-bottom:8px;">`;
+        personalBlock += `<div style="display:flex;flex-wrap:wrap;gap:5px 10px;margin-bottom:8px;">`;
         genderOptions.forEach(o => {
-          html += `<div class="lp-check-item" style="margin-bottom:0;padding:6px 10px;flex-shrink:0;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
+          personalBlock += `<div class="lp-check-item" style="margin-bottom:0;padding:6px 10px;flex-shrink:0;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
         });
-        html += `</div>`;
+        personalBlock += `</div>`;
       } else {
         genderOptions.forEach(o => {
-          html += `<div class="lp-check-item" style="margin-bottom:4px;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
+          personalBlock += `<div class="lp-check-item" style="margin-bottom:4px;"><div class="lp-radio"></div><div class="lp-check-label">${escHtml(o)}</div></div>`;
         });
       }
     }
   }
 
+  let statementsBlock = '';
   if (statementsEnabled && statements.length > 0) {
     const stmtsTitleText = gv('stmtsTitle') || 'I support this application because';
-    html += `<div class="lp-section-head" style="margin-top:18px">${escHtml(stmtsTitleText)}</div>
+    statementsBlock += `<div class="lp-section-head" style="margin-top:18px">${escHtml(stmtsTitleText)}</div>
     <p style="font-size:12px; color:var(--ink-soft); margin-bottom:10px">Tick as many as apply — your selected reasons will be included in your letter.</p>`;
     statements.forEach(s => {
-      html += `<div class="lp-check-item">
+      statementsBlock += `<div class="lp-check-item">
         <div class="lp-check"></div>
         <div class="lp-check-label">${escHtml(s.label || 'Untitled statement')}</div>
       </div>`;
@@ -2051,11 +2079,14 @@ function renderFormPreview() {
     ? `<span style="font-size:10px; font-weight:400; text-transform:none; letter-spacing:0; color:var(--ink-faint)">&nbsp;optional</span>`
     : `<span style="font-size:10px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--accent)">&nbsp;required</span>`;
 
-  html += `
+  const commentsBlock = `
     <div class="lp-section-head" style="margin-top:18px">${commentsLabel} ${commentsOptional}</div>
     <p style="font-size:12px; color:var(--ink-soft); margin-bottom:8px">${escHtml(commentsPrompt)}</p>
     <textarea class="lp-textarea" disabled placeholder="${statementsEnabled ? 'Your personal thoughts…' : 'Please share your thoughts… (required)'}"></textarea>
   `;
+
+  const previewSectionBlocks = { personal: personalBlock, statements: statementsBlock, comments: commentsBlock };
+  html += sectionOrder.map(key => previewSectionBlocks[key] || '').join('');
 
   if (consents.length > 0) {
     html += `<div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--rule-light)">`;
@@ -2139,6 +2170,42 @@ ${checkboxHTML}
     ${ageSectionHTML}
     ${genderSectionHTML}
   ` : '';
+
+  const personalDetailsSectionHTML = `
+    <div class="sub-heading">About you (required)</div>
+    <label for="name">Your Name <span class="req-marker">(required)</span></label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="email">Your Email <span class="req-marker">(required)</span></label>
+    <input type="email" id="email" name="email" required onblur="validateEmail(this)" oninput="clearEmailError(this)">
+    <div class="field-error" id="email-error">Please enter a valid email address (e.g. name@example.com).</div>
+
+    <label for="address1">Address Line 1 <span class="req-marker">(required)</span></label>
+    <input type="text" id="address1" name="address1" required>
+
+    <label for="address2">Address Line 2</label>
+    <input type="text" id="address2" name="address2">
+
+    <label for="citytown">City/Town <span class="req-marker">(required)</span></label>
+    <input type="text" id="citytown" name="citytown" required>
+
+    <label for="postcode">Postcode <span class="req-marker">(required)</span></label>
+    <input type="text" id="postcode" name="postcode" required>
+
+${demoSectionHTML}`;
+
+  const commentsSectionHTML = `
+    <h4>${commentsTitle}</h4>
+    <p>${escHtml(commentsPrompt)}</p>
+    <textarea id="additionalcomments" name="additionalcomments"${commentsRequired}></textarea>
+    <br><br>`;
+
+  const sectionBlocks = {
+    personal: personalDetailsSectionHTML,
+    statements: stmtSectionHTML,
+    comments: commentsSectionHTML
+  };
+  const sectionsHTML = sectionOrder.map(key => sectionBlocks[key] || '').join('\n');
 
   const consentHTML = consents.map(c =>
     `    <label><input type="checkbox" required> ${escHtml(c)} (required)</label><br>`
@@ -2250,38 +2317,13 @@ ${checkboxHTML}
 <div class="gether-support-form">
 <div id="letter-form-container" class="section-box">
   <h4>${escHtml(appRef)}</h4>
-  <div class="sub-heading">About you (required)</div>
 
   <form id="support-form" onsubmit="${previewEnabled ? 'generatePreview' : 'directSubmit'}(event)">
     <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
       <label for="website">Leave this field blank</label>
       <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
     </div>
-    <label for="name">Your Name <span class="req-marker">(required)</span></label>
-    <input type="text" id="name" name="name" required>
-
-    <label for="email">Your Email <span class="req-marker">(required)</span></label>
-    <input type="email" id="email" name="email" required onblur="validateEmail(this)" oninput="clearEmailError(this)">
-    <div class="field-error" id="email-error">Please enter a valid email address (e.g. name@example.com).</div>
-
-    <label for="address1">Address Line 1 <span class="req-marker">(required)</span></label>
-    <input type="text" id="address1" name="address1" required>
-
-    <label for="address2">Address Line 2</label>
-    <input type="text" id="address2" name="address2">
-
-    <label for="citytown">City/Town <span class="req-marker">(required)</span></label>
-    <input type="text" id="citytown" name="citytown" required>
-
-    <label for="postcode">Postcode <span class="req-marker">(required)</span></label>
-    <input type="text" id="postcode" name="postcode" required>
-
-${demoSectionHTML}
-${stmtSectionHTML}
-    <h4>${commentsTitle}</h4>
-    <p>${escHtml(commentsPrompt)}</p>
-    <textarea id="additionalcomments" name="additionalcomments"${commentsRequired}></textarea>
-    <br><br>
+${sectionsHTML}
 
 ${consentHTML}
 
@@ -2578,14 +2620,52 @@ async function testWebhook() {
 /* ══════════════════════════════════════════════════════════
    DEMOGRAPHICS
 ══════════════════════════════════════════════════════════ */
-let ageEnabled = false;
-let genderEnabled = false;
-let demoLayout = 'vertical';
+let ageEnabled = true;
+let genderEnabled = true;
+let demoLayout = 'horizontal';
 
 function setDemoLayout(layout) {
   demoLayout = layout;
   document.getElementById('layoutOptVertical').classList.toggle('active', layout === 'vertical');
   document.getElementById('layoutOptHorizontal').classList.toggle('active', layout === 'horizontal');
+  regen();
+}
+
+let sectionOrder = ['personal', 'statements', 'comments'];
+const sectionOrderLabels = {
+  personal: 'Personal details (incl. age/gender)',
+  statements: 'Statements',
+  comments: 'Additional comments'
+};
+
+function renderSectionOrder() {
+  const c = document.getElementById('sectionOrderList');
+  if (!c) return;
+  c.innerHTML = '';
+  sectionOrder.forEach((key, i) => {
+    const row = document.createElement('div');
+    row.className = 'demo-option-row';
+    row.innerHTML = `
+      <div class="stmt-reorder-btns">
+        <button class="stmt-reorder-btn" ${i === 0 ? 'disabled' : ''} onclick="moveSectionOrder(${i}, -1)" title="Move up">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
+        <button class="stmt-reorder-btn" ${i === sectionOrder.length - 1 ? 'disabled' : ''} onclick="moveSectionOrder(${i}, 1)" title="Move down">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div style="flex:1; font-size:13px; font-weight:500; color:var(--ink);">${i + 1}. ${sectionOrderLabels[key]}</div>
+    `;
+    c.appendChild(row);
+  });
+}
+
+function moveSectionOrder(i, direction) {
+  const target = i + direction;
+  if (target < 0 || target >= sectionOrder.length) return;
+  const [moved] = sectionOrder.splice(i, 1);
+  sectionOrder.splice(target, 0, moved);
+  renderSectionOrder();
   regen();
 }
 
@@ -2797,6 +2877,7 @@ function collectCurrentConfig() {
     btnRadius: gv('btnRadius') || '8px',
     formWidth: gv('formWidth') || '700px',
     demoLayout: demoLayout,
+    sectionOrder: sectionOrder.slice(),
     statementsEnabled: statementsEnabled,
     statements: JSON.parse(JSON.stringify(statements)),
     previewEnabled: previewEnabled,
@@ -2831,6 +2912,11 @@ function applyConfig(cfg) {
   demoLayout = cfg.demoLayout || 'vertical';
   document.getElementById('layoutOptVertical').classList.toggle('active', demoLayout === 'vertical');
   document.getElementById('layoutOptHorizontal').classList.toggle('active', demoLayout === 'horizontal');
+
+  const validSectionKeys = ['personal', 'statements', 'comments'];
+  const importedOrder = Array.isArray(cfg.sectionOrder) ? cfg.sectionOrder.filter(k => validSectionKeys.includes(k)) : [];
+  sectionOrder = importedOrder.length === 3 ? importedOrder : validSectionKeys.slice();
+  renderSectionOrder();
 
   statements = (cfg.statements && cfg.statements.length)
     ? JSON.parse(JSON.stringify(cfg.statements))
@@ -2902,10 +2988,14 @@ function deleteTemplate(i) {
 }
 
 function exportTemplates() {
-  const blob = new Blob([JSON.stringify(templates, null, 2)], { type: 'application/json' });
+  const name = prompt('Name this export (for your own reference):', gv('appRef') || 'Gether form setup');
+  if (name === null) return;
+  const data = { name: name.trim() || 'Untitled', config: collectCurrentConfig() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'gether-templates.json';
+  const fileSafeName = (name.trim() || 'gether-form-setup').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  a.download = `${fileSafeName}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -2917,13 +3007,23 @@ function importTemplatesFile(input) {
   reader.onload = () => {
     try {
       const imported = JSON.parse(reader.result);
-      if (!Array.isArray(imported)) throw new Error('Invalid file');
-      templates = templates.concat(imported);
-      saveTemplatesToStorage();
-      renderTemplates();
-      alert(`Imported ${imported.length} template(s).`);
+      if (Array.isArray(imported)) {
+        // Older bulk export of the whole templates library.
+        templates = templates.concat(imported);
+        saveTemplatesToStorage();
+        renderTemplates();
+        alert(`Imported ${imported.length} template(s).`);
+      } else if (imported && typeof imported === 'object' && imported.config) {
+        // A single exported form setup — add it as one new template.
+        templates.push({ name: imported.name || 'Imported setup', config: imported.config });
+        saveTemplatesToStorage();
+        renderTemplates();
+        alert('Imported 1 template.');
+      } else {
+        throw new Error('Invalid file');
+      }
     } catch (e) {
-      alert('Could not read that file — make sure it\'s a templates JSON file exported from this tool.');
+      alert('Could not read that file — make sure it\'s a .json file exported from this tool.');
     }
   };
   reader.readAsText(file);
@@ -2938,6 +3038,7 @@ renderStatements();
 renderConsents();
 renderDemoOptions('age');
 renderDemoOptions('gender');
+renderSectionOrder();
 loadTemplatesFromStorage();
 renderTemplates();
 regen();
