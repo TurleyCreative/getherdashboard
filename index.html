@@ -1297,7 +1297,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
   </button>
 </nav>
 
-<div class="app-version">v1.34.3</div>
+<div class="app-version">v1.35</div>
 
 <!-- ═══════════════════════════════════════ MAIN BODY -->
 <div class="app-body">
@@ -1448,6 +1448,15 @@ textarea.fi { resize: vertical; min-height: 60px; }
         <div class="field">
           <label>Statements section title</label>
           <input class="fi" type="text" id="stmtsTitle" value="I support this application because" oninput="regen()">
+        </div>
+        <div class="toggle-row" id="statementsRequiredRow" style="margin-bottom:14px;">
+          <div class="toggle-row-left">
+            <div class="toggle-row-label">Require at least one statement</div>
+            <div class="toggle-row-desc">When on, users must tick at least one statement before they can generate or submit their letter.</div>
+          </div>
+          <div class="pill-toggle" id="statementsRequiredToggle" onclick="toggleStatementsRequired()" title="Toggle whether a statement must be selected">
+            <div class="pill-track" id="statementsRequiredTrack"><div class="pill-thumb"></div></div>
+          </div>
         </div>
         <div id="statementsContainer"></div>
         <button class="add-stmt-btn" onclick="addStatement()">
@@ -2137,10 +2146,11 @@ function generateCode() {
   const stmtsTitle = gv('stmtsTitle') || 'I support this application because';
 
   const stmtSectionHTML = statementsEnabled && statements.length > 0 ? `
-    <h4>${escHtml(stmtsTitle)}</h4>
+    <h4>${escHtml(stmtsTitle)}${statementsRequired ? ' <span class="req-marker">(required)</span>' : ''}</h4>
     <p>Tick as many as apply — your selected reasons will be included in your letter:</p>
 
 ${checkboxHTML}
+    <div class="field-error" id="statements-error">Please select at least one option above.</div>
 ` : '';
 
   const commentsTitle = statementsEnabled ? 'Additional comments (optional)' : 'Your comments';
@@ -2360,6 +2370,18 @@ const reasonOptions = {
 ${reasonOptionsLines}
 };
 
+const statementsRequired = ${statementsEnabled && statementsRequired};
+
+function validateStatements(reasons) {
+  const error = document.getElementById('statements-error');
+  if (statementsRequired && reasons.length === 0) {
+    if (error) error.classList.add('visible');
+    return false;
+  }
+  if (error) error.classList.remove('visible');
+  return true;
+}
+
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -2431,6 +2453,10 @@ function generatePreview(event) {
   const email = document.getElementById('email').value.trim();
   const additional = document.getElementById('additionalcomments').value.trim();
   const reasons = Array.from(document.querySelectorAll('input[name="reasons"]:checked')).map(cb => cb.value);
+  if (!validateStatements(reasons)) {
+    document.getElementById('statements-error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
   document.getElementById('letter-preview').innerHTML = buildLetterBodyHTML(reasons, additional);
   document.getElementById('letter-signoff').innerHTML = buildSignOffHTML(name);
   document.getElementById('hidden-name').value = name;
@@ -2468,6 +2494,10 @@ function directSubmit(event) {
   const email = document.getElementById('email').value.trim();
   const additional = document.getElementById('additionalcomments').value.trim();
   const reasons = Array.from(document.querySelectorAll('input[name="reasons"]:checked')).map(cb => cb.value);
+  if (!validateStatements(reasons)) {
+    document.getElementById('statements-error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
   const letterHTML = buildLetterHTML(name, reasons, additional);
   submitToZapier(name, email, letterHTML);
 }
@@ -2731,7 +2761,14 @@ function toggleDemo(type) {
 
 
 let statementsEnabled = true;
+let statementsRequired = false;
 let previewEnabled = true;
+
+function toggleStatementsRequired() {
+  statementsRequired = !statementsRequired;
+  document.getElementById('statementsRequiredTrack').classList.toggle('on', statementsRequired);
+  regen();
+}
 const fieldToggles = {
   openingEnabled: true,
   stmtIntroEnabled: true,
@@ -2881,6 +2918,7 @@ function collectCurrentConfig() {
     demoLayout: demoLayout,
     sectionOrder: sectionOrder.slice(),
     statementsEnabled: statementsEnabled,
+    statementsRequired: statementsRequired,
     statements: JSON.parse(JSON.stringify(statements)),
     previewEnabled: previewEnabled,
     fieldToggles: JSON.parse(JSON.stringify(fieldToggles)),
@@ -2927,6 +2965,9 @@ function applyConfig(cfg) {
 
   statementsEnabled = cfg.statementsEnabled !== false;
   syncStatementsEnabledUI();
+
+  statementsRequired = !!cfg.statementsRequired;
+  document.getElementById('statementsRequiredTrack').classList.toggle('on', statementsRequired);
 
   previewEnabled = cfg.previewEnabled !== false;
   syncPreviewEnabledUI();
