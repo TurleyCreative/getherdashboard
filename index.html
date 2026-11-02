@@ -339,7 +339,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
 
 .stmt-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 10px 12px;
   background: var(--mint-light);
@@ -391,6 +391,12 @@ textarea.fi { resize: vertical; min-height: 60px; }
   color: var(--ink);
   outline: none;
   min-width: 0;
+  padding: 0;
+  margin: 0;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.4;
+  min-height: 20px;
 }
 
 .stmt-label-input::placeholder { color: var(--ink-faint); font-weight: 400; }
@@ -439,6 +445,11 @@ textarea.fi { resize: vertical; min-height: 60px; }
   min-height: 50px;
   font-size: 12px;
   line-height: 1.4;
+}
+
+.stmt-phrasing-single {
+  min-height: 60px;
+  overflow-y: auto;
 }
 
 .icon-btn {
@@ -1297,7 +1308,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
   </button>
 </nav>
 
-<div class="app-version">v1.35</div>
+<div class="app-version">v1.35.2</div>
 
 <!-- ═══════════════════════════════════════ MAIN BODY -->
 <div class="app-body">
@@ -1787,6 +1798,12 @@ function switchTab(name, el) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   el.classList.add('active');
+  if (name === 'statements') {
+    // The panel was hidden (display:none) when these fields first rendered, so
+    // their auto-grow height may have been measured as 0 — recalculate now that
+    // the panel is actually visible and laid out.
+    document.querySelectorAll('#tab-statements .stmt-label-input, #tab-statements .stmt-phrasing-single').forEach(autoGrowTextarea);
+  }
 }
 
 function switchView(name) {
@@ -1823,10 +1840,11 @@ function renderStatements() {
           </button>
         </div>
         <div class="stmt-number">${si+1}</div>
-        <input class="stmt-label-input" type="text" value="${esc(stmt.label)}"
+        <textarea class="stmt-label-input" rows="1"
           onclick="event.stopPropagation()"
           onchange="statements[${si}].label=this.value; regen()"
-          placeholder="Checkbox label shown on the form…">
+          oninput="autoGrowTextarea(this)"
+          placeholder="Checkbox label shown on the form…">${escHtml(stmt.label)}</textarea>
         <button class="stmt-toggle-btn ${stmt.open ? 'open' : ''}" onclick="event.stopPropagation(); toggleStmt(${si})">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
@@ -1846,6 +1864,7 @@ function renderStatements() {
       </div>
     `;
     c.appendChild(card);
+    autoGrowTextarea(card.querySelector('.stmt-label-input'));
     renderVariants(si);
   });
 }
@@ -1889,13 +1908,19 @@ function renderVariants(si) {
     row.className = 'variant-row';
     row.innerHTML = `
       ${randomOn ? `<div class="variant-badge">${vi+1}</div>` : ''}
-      <textarea class="fi" onchange="statements[${si}].variants[${vi}]=this.value; regen()">${escHtml(v)}</textarea>
+      <textarea class="fi${randomOn ? '' : ' stmt-phrasing-single'}" onchange="statements[${si}].variants[${vi}]=this.value; regen()"${randomOn ? '' : ' oninput="autoGrowTextarea(this)"'}>${escHtml(v)}</textarea>
       ${randomOn ? `<button class="icon-btn" onclick="removeVariant(${si},${vi})" title="Remove phrasing">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>` : ''}
     `;
     vc.appendChild(row);
+    if (!randomOn) autoGrowTextarea(row.querySelector('textarea'));
   });
+}
+
+function autoGrowTextarea(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
 }
 
 function addVariant(si) {
@@ -1929,7 +1954,7 @@ function addStatement() {
   renderStatements();
   regen();
   setTimeout(() => {
-    const inputs = document.querySelectorAll('.stmt-label-input');
+    const inputs = document.querySelectorAll('#statementsContainer .stmt-label-input');
     inputs[inputs.length-1].focus();
   }, 60);
 }
@@ -2073,8 +2098,8 @@ function renderFormPreview() {
   let statementsBlock = '';
   if (statementsEnabled && statements.length > 0) {
     const stmtsTitleText = gv('stmtsTitle') || 'I support this application because';
-    statementsBlock += `<div class="lp-section-head" style="margin-top:18px">${escHtml(stmtsTitleText)}</div>
-    <p style="font-size:12px; color:var(--ink-soft); margin-bottom:10px">Tick as many as apply — your selected reasons will be included in your letter.</p>`;
+    statementsBlock += `<div class="lp-section-head" style="margin-top:18px">${escHtml(stmtsTitleText)}${statementsRequired ? ' <span class="lp-req">(required)</span>' : ''}</div>
+    <p style="font-size:12px; color:var(--ink-soft); margin-bottom:10px">Tick as many as apply — your selected reasons will be included in your letter.${statementsRequired ? ' At least one must be selected.' : ''}</p>`;
     statements.forEach(s => {
       statementsBlock += `<div class="lp-check-item">
         <div class="lp-check"></div>
@@ -2147,7 +2172,7 @@ function generateCode() {
 
   const stmtSectionHTML = statementsEnabled && statements.length > 0 ? `
     <h4>${escHtml(stmtsTitle)}${statementsRequired ? ' <span class="req-marker">(required)</span>' : ''}</h4>
-    <p>Tick as many as apply — your selected reasons will be included in your letter:</p>
+    <p>Tick as many as apply — your selected reasons will be included in your letter${statementsRequired ? '. At least one must be selected.' : ':'}</p>
 
 ${checkboxHTML}
     <div class="field-error" id="statements-error">Please select at least one option above.</div>
