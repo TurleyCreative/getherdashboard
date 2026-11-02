@@ -958,6 +958,21 @@ textarea.fi { resize: vertical; min-height: 60px; }
 
 .info-box svg { flex-shrink: 0; margin-top: 1px; }
 
+.warning-box {
+  background: #FDF0EE;
+  border: 1px solid #F0C4BC;
+  border-radius: 6px;
+  padding: 9px 11px;
+  font-size: 11.5px;
+  color: var(--danger);
+  line-height: 1.5;
+  display: flex;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.warning-box svg { flex-shrink: 0; margin-top: 1px; }
+
 .section-pill {
   display: inline-flex;
   align-items: center;
@@ -1308,7 +1323,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
   </button>
 </nav>
 
-<div class="app-version">v1.35.3</div>
+<div class="app-version">v1.35.4</div>
 
 <!-- ═══════════════════════════════════════ MAIN BODY -->
 <div class="app-body">
@@ -1692,6 +1707,10 @@ textarea.fi { resize: vertical; min-height: 60px; }
         </div>
 
         <div id="templatesUnlocked" style="display:none;">
+          <div class="warning-box">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            The Zapier webhook URL is always left blank when a template loads. Whenever you load a template or a previously saved version, you'll need to re-add the correct webhook URL for that client before the form can submit.
+          </div>
           <div class="info-box" style="margin-bottom:14px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             Loading a template replaces every field in the builder (except the webhook URL, which is always left blank for you to fill in per client). Templates are saved in this browser only. Export downloads your current setup as a .json file — hand it to a teammate and they can Import it to add it as a template in their own browser.
