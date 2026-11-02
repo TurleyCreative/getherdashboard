@@ -1308,7 +1308,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
   </button>
 </nav>
 
-<div class="app-version">v1.35.2</div>
+<div class="app-version">v1.35.3</div>
 
 <!-- ═══════════════════════════════════════ MAIN BODY -->
 <div class="app-body">
@@ -2110,8 +2110,8 @@ function renderFormPreview() {
 
   const commentsLabel = statementsEnabled ? 'Additional comments' : 'Your comments';
   const commentsOptional = statementsEnabled
-    ? `<span style="font-size:10px; font-weight:400; text-transform:none; letter-spacing:0; color:var(--ink-faint)">&nbsp;optional</span>`
-    : `<span style="font-size:10px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--accent)">&nbsp;required</span>`;
+    ? `<span class="lp-req" style="text-transform:none; letter-spacing:0;">(optional)</span>`
+    : `<span class="lp-req" style="text-transform:none; letter-spacing:0;">(required)</span>`;
 
   const commentsBlock = `
     <div class="lp-section-head" style="margin-top:18px">${commentsLabel} ${commentsOptional}</div>
@@ -2178,7 +2178,7 @@ ${checkboxHTML}
     <div class="field-error" id="statements-error">Please select at least one option above.</div>
 ` : '';
 
-  const commentsTitle = statementsEnabled ? 'Additional comments (optional)' : 'Your comments';
+  const commentsTitle = statementsEnabled ? 'Additional comments <span class="req-marker">(optional)</span>' : 'Your comments';
   const commentsRequired = statementsEnabled ? '' : ' required';
 
   // Demographics
@@ -2207,7 +2207,7 @@ ${checkboxHTML}
   ` : '';
 
   const personalDetailsSectionHTML = `
-    <div class="sub-heading">About you (required)</div>
+    <div class="sub-heading">About you <span class="req-marker">(required)</span></div>
     <label for="name">Your Name <span class="req-marker">(required)</span></label>
     <input type="text" id="name" name="name" required>
 
