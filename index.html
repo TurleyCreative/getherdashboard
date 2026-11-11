@@ -1297,6 +1297,11 @@ textarea.fi { resize: vertical; min-height: 60px; }
     </span>
   </button>
   <div class="nav-divider"></div>
+  <button class="nav-tab" data-tab="comments" onclick="switchTab('comments', this)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    Comments
+  </button>
+  <div class="nav-divider"></div>
   <button class="nav-tab" data-tab="personal" onclick="switchTab('personal', this)">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     Personal Details
@@ -1323,7 +1328,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
   </button>
 </nav>
 
-<div class="app-version">v1.35.4</div>
+<div class="app-version">v1.36</div>
 
 <!-- ═══════════════════════════════════════ MAIN BODY -->
 <div class="app-body">
@@ -1491,6 +1496,27 @@ textarea.fi { resize: vertical; min-height: 60px; }
         </button>
       </div>
 
+      <!-- ── TAB: COMMENTS ── -->
+      <div class="tab-panel" id="tab-comments">
+        <div class="section-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Comments
+        </div>
+        <div class="info-box" style="margin-bottom: 14px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          This is the free-text box users fill in themselves. If statements are turned off, this box automatically becomes the form's only required field and is labelled "Your comments" instead.
+        </div>
+        <div class="field">
+          <label>Section title</label>
+          <input class="fi" type="text" id="commentsSectionTitle" value="Additional comments" oninput="regen()">
+          <div class="hint">Shown above the comments box when statements are enabled.</div>
+        </div>
+        <div class="field">
+          <label>Description / prompt</label>
+          <textarea class="fi" id="commentsPrompt" rows="2" oninput="regen()">Please feel free to add any personal thoughts on why you support the application:</textarea>
+        </div>
+      </div>
+
       <!-- ── TAB: LETTER COPY ── -->
       <div class="tab-panel" id="tab-letter">
         <div class="section-pill">
@@ -1559,15 +1585,20 @@ textarea.fi { resize: vertical; min-height: 60px; }
           </div>
         </div>
 
-        <!-- Comments prompt -->
+        <!-- Comments intro line -->
         <div class="lc-field-block" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
           <div class="lc-field-header">
             <div class="lc-field-meta">
-              <div class="lc-field-name">Comments box prompt</div>
-              <div class="lc-field-desc">The instructional text shown above the free-text comments box on the form. Encourage users to add personal context — unique comments make each submission more effective.</div>
+              <div class="lc-field-name">Comment introduction line</div>
+              <div class="lc-field-desc">Appears before the user's free-text comments when they're shown after the support statements in the letter (based on the section order set in the Design tab). Not shown if comments appear first, or if there are no statements.</div>
+            </div>
+            <div class="pill-toggle" id="commentsIntroToggle" onclick="toggleField('commentsIntro')" title="Enable or disable intro line">
+              <div class="pill-track on" id="commentsIntroToggleTrack"><div class="pill-thumb"></div></div>
             </div>
           </div>
-          <textarea class="fi" id="commentsPrompt" rows="2" oninput="regen()">Please feel free to add any personal thoughts on why you support the application:</textarea>
+          <div id="commentsIntroFieldWrap">
+            <textarea class="fi" id="commentsIntro" rows="2" oninput="regen()">I would also like to mention:</textarea>
+          </div>
         </div>
 
         <div class="lc-divider"></div>
@@ -2127,7 +2158,8 @@ function renderFormPreview() {
     });
   }
 
-  const commentsLabel = statementsEnabled ? 'Additional comments' : 'Your comments';
+  const commentsSectionTitle = gv('commentsSectionTitle') || 'Additional comments';
+  const commentsLabel = statementsEnabled ? escHtml(commentsSectionTitle) : 'Your comments';
   const commentsOptional = statementsEnabled
     ? `<span class="lp-req" style="text-transform:none; letter-spacing:0;">(optional)</span>`
     : `<span class="lp-req" style="text-transform:none; letter-spacing:0;">(required)</span>`;
@@ -2171,6 +2203,8 @@ function generateCode() {
   const openingPara = fieldToggles.openingEnabled ? (gv('openingPara') || 'I am writing to express my support for the above planning application.') : '';
   const stmtIntro = fieldToggles.stmtIntroEnabled ? (gv('stmtIntro') || 'I believe this development will benefit our community in the following ways:') : '';
   const closingLine = fieldToggles.closingEnabled ? (gv('closingLine') || 'I urge you to grant planning permission for this application.') : '';
+  const commentsIntro = fieldToggles.commentsIntroEnabled ? (gv('commentsIntro') || 'I would also like to mention:') : '';
+  const commentsBeforeStatements = sectionOrder.indexOf('comments') < sectionOrder.indexOf('statements');
   const commentsPrompt = gv('commentsPrompt') || 'Please feel free to add any personal thoughts on why you support the application:';
   const generateBtnText = gv('generateBtnText') || (previewEnabled ? 'Generate My Letter' : 'Submit My Support');
   const submitBtnText = gv('submitBtnText') || 'Submit Letter';
@@ -2197,7 +2231,8 @@ ${checkboxHTML}
     <div class="field-error" id="statements-error">Please select at least one option above.</div>
 ` : '';
 
-  const commentsTitle = statementsEnabled ? 'Additional comments <span class="req-marker">(optional)</span>' : 'Your comments';
+  const commentsSectionTitle = gv('commentsSectionTitle') || 'Additional comments';
+  const commentsTitle = statementsEnabled ? `${escHtml(commentsSectionTitle)} <span class="req-marker">(optional)</span>` : 'Your comments';
   const commentsRequired = statementsEnabled ? '' : ' required';
 
   // Demographics
@@ -2457,22 +2492,41 @@ function buildLetterBodyHTML(reasons, additional) {
   let html = '';
   const openingPara = ${JSON.stringify(openingPara)};
   const stmtIntro = ${JSON.stringify(stmtIntro)};
+  const commentsIntro = ${JSON.stringify(commentsIntro)};
   const closingLine = ${JSON.stringify(closingLine)};
+  const commentsBeforeStatements = ${commentsBeforeStatements};
+  const hasReasons = reasons.length > 0;
+  const hasAdditional = !!additional;
 
   if (openingPara) {
     html += '<p>Dear Officer,</p>';
     html += '<p>' + openingPara + '</p>';
   }
 
-  if (reasons.length > 0) {
-    if (stmtIntro) html += '<p>' + stmtIntro + '</p>';
-    html += '<ul>';
-    reasons.forEach(key => { html += '<li>' + pickRandom(reasonOptions[key]) + '</li>'; });
-    html += '</ul>';
+  function statementsBlock() {
+    if (!hasReasons) return '';
+    let s = '';
+    if (stmtIntro) s += '<p>' + stmtIntro + '</p>';
+    s += '<ul>';
+    reasons.forEach(key => { s += '<li>' + pickRandom(reasonOptions[key]) + '</li>'; });
+    s += '</ul>';
+    return s;
   }
-  if (additional) {
-    html += reasons.length > 0 ? '<p>I would also like to mention: ' + additional + '</p>' : '<p>' + additional + '</p>';
+
+  function commentsBlock(leading) {
+    if (!hasAdditional) return '';
+    if (leading || !hasReasons) return '<p>' + additional + '</p>';
+    return '<p>' + (commentsIntro ? commentsIntro + ' ' : '') + additional + '</p>';
   }
+
+  if (commentsBeforeStatements) {
+    html += commentsBlock(true);
+    html += statementsBlock();
+  } else {
+    html += statementsBlock();
+    html += commentsBlock(false);
+  }
+
   if (closingLine) html += '<p>' + closingLine + '</p>';
   return html;
 }
@@ -2816,7 +2870,8 @@ function toggleStatementsRequired() {
 const fieldToggles = {
   openingEnabled: true,
   stmtIntroEnabled: true,
-  closingEnabled: true
+  closingEnabled: true,
+  commentsIntroEnabled: true
 };
 
 function syncPreviewEnabledUI() {
@@ -2830,7 +2885,7 @@ function togglePreviewEnabled() {
 
   // When turning preview off, auto-disable opening para, stmt intro and closing line
   if (!previewEnabled) {
-    ['opening', 'stmtIntro', 'closing'].forEach(name => {
+    ['opening', 'stmtIntro', 'closing', 'commentsIntro'].forEach(name => {
       const m = fieldToggleMap[name];
       if (fieldToggles[m.flag]) {
         fieldToggles[m.flag] = false;
@@ -2846,7 +2901,8 @@ function togglePreviewEnabled() {
 const fieldToggleMap = {
   opening:   { flag: 'openingEnabled',   trackId: 'openingToggleTrack',   wrapId: 'openingFieldWrap' },
   stmtIntro: { flag: 'stmtIntroEnabled', trackId: 'stmtIntroToggleTrack', wrapId: 'stmtIntroFieldWrap' },
-  closing:   { flag: 'closingEnabled',   trackId: 'closingToggleTrack',   wrapId: 'closingFieldWrap' }
+  closing:   { flag: 'closingEnabled',   trackId: 'closingToggleTrack',   wrapId: 'closingFieldWrap' },
+  commentsIntro: { flag: 'commentsIntroEnabled', trackId: 'commentsIntroToggleTrack', wrapId: 'commentsIntroFieldWrap' }
 };
 
 function syncFieldToggleUI(name) {
@@ -2970,6 +3026,8 @@ function collectCurrentConfig() {
     stmtIntro: gv('stmtIntro'),
     closingLine: gv('closingLine'),
     commentsPrompt: gv('commentsPrompt'),
+    commentsSectionTitle: gv('commentsSectionTitle'),
+    commentsIntro: gv('commentsIntro'),
     stmtsTitle: gv('stmtsTitle'),
     generateBtnText: gv('generateBtnText'),
     submitBtnText: gv('submitBtnText'),
@@ -3019,14 +3077,18 @@ function applyConfig(cfg) {
   fieldToggles.openingEnabled = !!cfg.fieldToggles?.openingEnabled;
   fieldToggles.stmtIntroEnabled = !!cfg.fieldToggles?.stmtIntroEnabled;
   fieldToggles.closingEnabled = !!cfg.fieldToggles?.closingEnabled;
+  fieldToggles.commentsIntroEnabled = cfg.fieldToggles?.commentsIntroEnabled !== false;
   syncFieldToggleUI('opening');
   syncFieldToggleUI('stmtIntro');
   syncFieldToggleUI('closing');
+  syncFieldToggleUI('commentsIntro');
 
   document.getElementById('openingPara').value = cfg.openingPara || '';
   document.getElementById('stmtIntro').value = cfg.stmtIntro || '';
   document.getElementById('closingLine').value = cfg.closingLine || '';
+  document.getElementById('commentsIntro').value = cfg.commentsIntro || '';
   document.getElementById('commentsPrompt').value = cfg.commentsPrompt || '';
+  document.getElementById('commentsSectionTitle').value = cfg.commentsSectionTitle || '';
   document.getElementById('stmtsTitle').value = cfg.stmtsTitle || 'I support this application because';
   document.getElementById('generateBtnText').value = cfg.generateBtnText || '';
   document.getElementById('submitBtnText').value = cfg.submitBtnText || '';
