@@ -1328,7 +1328,7 @@ textarea.fi { resize: vertical; min-height: 60px; }
   </button>
 </nav>
 
-<div class="app-version">v1.36.2</div>
+<div class="app-version">v1.36.3</div>
 
 <!-- ═══════════════════════════════════════ MAIN BODY -->
 <div class="app-body">
@@ -2148,7 +2148,7 @@ function renderFormPreview() {
   let statementsBlock = '';
   if (statementsEnabled && statements.length > 0) {
     const stmtsTitleText = gv('stmtsTitle') || 'I support this application because';
-    statementsBlock += `<div class="lp-section-head" style="margin-top:18px">${escHtml(stmtsTitleText)}${statementsRequired ? ' <span class="lp-req">(required)</span>' : ''}</div>
+    statementsBlock += `<div class="lp-section-head" style="margin-top:18px">${escHtml(stmtsTitleText)} <span class="lp-req">${statementsRequired ? '(required)' : '(optional)'}</span></div>
     <p style="font-size:12px; color:var(--ink-soft); margin-bottom:10px">Tick as many as apply — your selected reasons will be included in your letter.${statementsRequired ? ' At least one must be selected.' : ''}</p>`;
     statements.forEach(s => {
       statementsBlock += `<div class="lp-check-item">
@@ -2226,7 +2226,7 @@ function generateCode() {
   const stmtsTitle = gv('stmtsTitle') || 'I support this application because';
 
   const stmtSectionHTML = statementsEnabled && statements.length > 0 ? `
-    <h4>${escHtml(stmtsTitle)}${statementsRequired ? ' <span class="req-marker">(required)</span>' : ''}</h4>
+    <h4>${escHtml(stmtsTitle)} <span class="req-marker">${statementsRequired ? '(required)' : '(optional)'}</span></h4>
     <p>Tick as many as apply — your selected reasons will be included in your letter${statementsRequired ? '. At least one must be selected.' : ':'}</p>
 
 ${checkboxHTML}
